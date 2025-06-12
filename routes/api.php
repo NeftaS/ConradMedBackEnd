@@ -22,7 +22,7 @@ Route::middleware([IsUserAuth::class])->group(function () {
         Route::post('agendar', 'agregarCita');
         Route::get('mostrar', 'mostrarCita');
         // Route::put('actualizar', 'actualizarCita');
-        Route::post('eliminar/{id}', 'eliminarCita');
+        Route::get('eliminar/{id}', 'eliminarCita');
     });
 
 });

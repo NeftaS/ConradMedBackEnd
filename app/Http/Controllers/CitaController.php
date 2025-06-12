@@ -64,6 +64,21 @@ class CitaController extends Controller
         return response()->json(['citas' => $citas], 200);
     }
 
+    public function eliminarCita($id)
+    {
+        $userId = Auth::id();
+
+        $cita = Cita::where('id', $id)->where('user_id', $userId)->first();
+
+        if (!$cita) {
+            return response()->json(['error' => 'Cita no encontrada'], 404);
+        }
+
+        $cita->delete();
+
+        return response()->json(['message' => 'Cita eliminada correctamente'], 200);
+    }
+
     // /**
     //  * Show the form for editing the specified resource.
     //  */
@@ -83,8 +98,5 @@ class CitaController extends Controller
     // /**
     //  * Remove the specified resource from storage.
     //  */
-    // public function destroy(Cita $cita)
-    // {
-    //     //
-    // }
+
 }
