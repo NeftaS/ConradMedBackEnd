@@ -33,9 +33,11 @@ class AuthController extends Controller
             'password' => bcrypt($request->password),
         ]);
 
+        $token = JWTAuth::fromUser($user);
+
         $user->makeHidden(['password']);
 
-        return response()->json(['message'=>'Usuario creado correctamente', 'user' => $user], 201);
+        return response()->json(['message'=>'Usuario creado correctamente', 'user' => $user, 'token' => $token], 201);
     }
 
     public function login(Request $request){
