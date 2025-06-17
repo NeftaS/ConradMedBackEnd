@@ -44,4 +44,20 @@ class AnalisisController extends Controller
         return response()->json(['analisis' => $analisis], 200);
     }
 
+    public function mostrarAnalisisPorId($id)
+    {
+        $analisis = Analisis::with([
+                'categoria:id,categoria_nombre',
+                'tipoanalisis:id,tipoanalisis_nombre',
+                'doctor:id,doctor_nombre'
+            ])
+            ->find($id);
+
+        if (!$analisis) {
+            return response()->json(['error' => 'Análisis no encontrado'], 404);
+        }
+
+        return response()->json(['analisis' => $analisis], 200);
+    }
+
 }

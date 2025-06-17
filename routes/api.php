@@ -27,5 +27,6 @@ Route::middleware([IsUserAuth::class])->group(function () {
     Route::prefix('analisis')->controller(AnalisisController::class)->group(function () {
         Route::post('agendar', 'agregarAnalisis');
         Route::get('mostrar', 'mostrarAnalisis');
+        Route::get('mostrar/{id}', 'mostrarAnalisis');
     });
 });
