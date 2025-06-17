@@ -9,9 +9,7 @@ use Illuminate\Support\Facades\Validator;
 
 class CitaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function mostrarCitaPorId($id)
     {
         $userId = Auth::id();
@@ -25,9 +23,6 @@ class CitaController extends Controller
         return response()->json($cita, 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function agregarCita(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -52,10 +47,6 @@ class CitaController extends Controller
         return response()->json(['message' => 'Cita creada correctamente', 'cita' => $cita], 201);
     }
 
-
-    // /**
-    //  * Display the specified resource.
-    //  */
     public function mostrarCita()
     {
         $user_id = Auth::id();
@@ -79,24 +70,35 @@ class CitaController extends Controller
         return response()->json(['message' => 'Cita eliminada correctamente'], 200);
     }
 
-    // /**
-    //  * Show the form for editing the specified resource.
-    //  */
-    // public function edit(Cita $cita)
-    // {
-    //     //
-    // }
 
-    // /**
-    //  * Update the specified resource in storage.
-    //  */
-    // public function update(Request $request, Cita $cita)
-    // {
-    //     //
-    // }
+    public function actualizarCita(Request $request, $id)
+    {
+        $userId = Auth::id();
 
-    // /**
-    //  * Remove the specified resource from storage.
-    //  */
+        $validator = Validator::make($request->all(), [
+            'nombre_paciente' => 'sometimes|required|string|min:3|max:45',
+            'telefono_paciente' => 'sometimes|required|digits:10',
+            'tipo_estudio' => 'sometimes|required|string',
+            'edad_paciente' => 'sometimes|required|integer|min:1|max:120',
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        $cita = Cita::where('id', $id)->where('user_id', $userId)->first();
+
+        if (!$cita) {
+            return response()->json(['error' => 'Cita no encontrada'], 404);
+        }
+
+        $cita->update($request->only([
+            'nombre_paciente',
+            'telefono_paciente',
+            'tipo_estudio',
+            'edad_paciente',
+        ]));
+
+        return response()->json(['message' => 'Cita actualizada correctamente', 'cita' => $cita], 200);
+    }
 }

@@ -26,14 +26,16 @@ class AuthController extends Controller
             return response()->json(['error' => $validator->errors()], 422);
         }
 
-        User::create([
+        $user = User::create([
             'nombre' => $request->nombre,
             'telefono' => $request->telefono,
             'email' => $request->email,
             'password' => bcrypt($request->password),
         ]);
 
-        return response()->json(['message'=>'Usuario creado correctamente'], 201);
+        $user->makeHidden(['password']);
+
+        return response()->json(['message'=>'Usuario creado correctamente', 'user' => $user], 201);
     }
 
     public function login(Request $request){
@@ -53,7 +55,9 @@ class AuthController extends Controller
                 return response()->json(['error' => 'Telefono o contraseña incorrectos'], 401);
             }
 
-            return response()->json(['token' => $token], 200);
+            $user = Auth::user();
+
+            return response()->json(['user' => $user,'token' => $token], 200);
 
         }catch(JWTException $e){
             return response()->json(['error' => 'No se puede iniciar sesión, intente más tarde', $e], 500);
