@@ -15,29 +15,33 @@ class AuthController extends Controller
 {
     public function register(Request $request){
 
+
         $validator = Validator::make($request->all(), [
             'nombre' =>'required|string|min:3|max:45',
-            'telefono' =>'required|string|min:10|max:10|unique:users',
-            'email' =>'required|string|email|unique:users',
+            'telefono' =>'required|string|min:10|max:10|unique:usuarios',
+            'email' =>'required|string|email|unique:usuarios',
             'password' =>'required|string|min:8|confirmed',
+            'rol_id' =>'required|exists:roles,id'
         ]);
 
         if($validator->fails()){
             return response()->json(['error' => $validator->errors()], 422);
         }
 
+        // return response()->json(['message'=>'Usuario creado correctamente'], 201);
+
         $user = User::create([
             'nombre' => $request->nombre,
             'telefono' => $request->telefono,
             'email' => $request->email,
             'password' => bcrypt($request->password),
+            'rol_id' => $request->rol_id
         ]);
 
-        $token = JWTAuth::fromUser($user);
 
         $user->makeHidden(['password']);
 
-        return response()->json(['message'=>'Usuario creado correctamente', 'user' => $user, 'token' => $token], 201);
+        return response()->json(['message'=>'Usuario creado correctamente', 'user' => $user], 201);
     }
 
     public function login(Request $request){

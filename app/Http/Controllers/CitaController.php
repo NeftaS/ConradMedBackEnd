@@ -9,12 +9,28 @@ use Illuminate\Support\Facades\Validator;
 
 class CitaController extends Controller
 {
+    public function mostrarCita()
+    {
+        $user_id = Auth::id();
+        $citas = Cita::with(['lugar:id,lugar_nombre', 'doctor:id,doctor_nombre', 'user:id,nombre'])
+            ->where('cliente_id', $user_id)
+            ->get();
+
+        return response()->json(['citas' => $citas], 200);
+    }
 
     public function mostrarCitaPorId($id)
     {
         $userId = Auth::id();
 
-        $cita = Cita::where('id', $id)->where('user_id', $userId)->first();
+        $cita = Cita::with([
+            'lugar:id,lugar_nombre',
+            'doctor:id,doctor_nombre',
+            'user:id,nombre'
+        ])
+        ->where('id', $id)
+        ->where('cliente_id', $userId)
+        ->first();
 
         if (!$cita) {
             return response()->json(['error' => 'Cita no encontrada'], 404);
@@ -26,10 +42,11 @@ class CitaController extends Controller
     public function agregarCita(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'nombre_paciente' =>'required|string|min:3|max:45',
-            'telefono_paciente' => 'required|digits:10',
-            'tipo_estudio' =>'required|string',
-            'edad_paciente' => 'required|integer|min:1|max:120'
+            'cita_fecha'    => 'required|date_format:Y-m-d H:i:s',
+            'cita_estatus'  => 'required|in:Activo,Cancelado,Completado',
+            'lugar_id'      => 'required|exists:lugares,id',
+            'doctor_id'     => 'required|exists:doctores,id',
+            'cliente_id'    => 'required|exists:usuarios,id',
         ]);
 
         if ($validator->fails()) {
@@ -37,66 +54,71 @@ class CitaController extends Controller
         }
 
         $cita = Cita::create([
-            'nombre_paciente' => $request->nombre_paciente,
-            'telefono_paciente' => $request->telefono_paciente,
-            'tipo_estudio' => $request->tipo_estudio,
-            'edad_paciente' => $request->edad_paciente,
-            'user_id' => Auth::id(),
+            'cita_fecha' => $request->cita_fecha,
+            'cita_estatus' => $request->cita_estatus,
+            'lugar_id' => $request->lugar_id,
+            'doctor_id' => $request->doctor_id,
+            'cliente_id' => $request->cliente_id,
         ]);
 
         return response()->json(['message' => 'Cita creada correctamente', 'cita' => $cita], 201);
     }
 
-    public function mostrarCita()
-    {
-        $user_id = Auth::id();
-        $citas = Cita::where('user_id', $user_id)->get();
 
-        return response()->json(['citas' => $citas], 200);
-    }
 
-    public function eliminarCita($id)
+    public function cancelarCita($id)
     {
         $userId = Auth::id();
 
-        $cita = Cita::where('id', $id)->where('user_id', $userId)->first();
+
+        $cita = Cita::where('id', $id)->where('cliente_id', $userId)->first();
 
         if (!$cita) {
             return response()->json(['error' => 'Cita no encontrada'], 404);
         }
 
-        $cita->delete();
+        $cita->update([
+            'cita_estatus' => "Cancelado"
+        ]);
 
-        return response()->json(['message' => 'Cita eliminada correctamente'], 200);
+        return response()->json(['message' => 'Cita cancelada correctamente'], 200);
     }
-
 
     public function actualizarCita(Request $request, $id)
     {
         $userId = Auth::id();
 
         $validator = Validator::make($request->all(), [
-            'nombre_paciente' => 'sometimes|required|string|min:3|max:45',
-            'telefono_paciente' => 'sometimes|required|digits:10',
-            'tipo_estudio' => 'sometimes|required|string',
-            'edad_paciente' => 'sometimes|required|integer|min:1|max:120',
+            'cita_fecha'    => 'required|date_format:Y-m-d H:i:s',
+            'cita_estatus'  => 'required|in:Activo,Cancelado,Completado',
+            'lugar_id'      => 'required|exists:lugares,id',
+            'doctor_id'     => 'required|exists:doctores,id',
+            'cliente_id'    => 'required|exists:usuarios,id',
         ]);
+
+        // $validator = Validator::make($request->all(), [
+        //     'nombre_paciente' => 'sometimes|required|string|min:3|max:45',
+        //     'telefono_paciente' => 'sometimes|required|digits:10',
+        //     'tipo_estudio' => 'sometimes|required|string',
+        //     'edad_paciente' => 'sometimes|required|integer|min:1|max:120',
+        // ]);
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 422);
         }
 
-        $cita = Cita::where('id', $id)->where('user_id', $userId)->first();
+        $cita = Cita::where('id', $id)->where('cliente_id', $userId)->first();
 
         if (!$cita) {
             return response()->json(['error' => 'Cita no encontrada'], 404);
         }
 
         $cita->update($request->only([
-            'nombre_paciente',
-            'telefono_paciente',
-            'tipo_estudio',
-            'edad_paciente',
+            'cita_fecha',
+            'cita_estatus',
+            'lugar_id',
+            'doctor_id',
+            'cliente_id'
         ]));
 
         return response()->json(['message' => 'Cita actualizada correctamente', 'cita' => $cita], 200);

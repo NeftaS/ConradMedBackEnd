@@ -9,16 +9,28 @@ class Cita extends Model
 {
     use HasFactory;
 
+    protected $table = 'citas';
+
     protected $fillable = [
-        'nombre_paciente',
-        'telefono_paciente',
-        'tipo_estudio',
-        'edad_paciente',
-        'user_id',
+        'cita_fecha',
+        'cita_estatus',
+        'lugar_id',
+        'doctor_id',
+        'cliente_id'
     ];
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'cliente_id');
+    }
+
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class);
+    }
+
+    public function lugar()
+    {
+        return $this->belongsTo(Lugar::class);
     }
 }

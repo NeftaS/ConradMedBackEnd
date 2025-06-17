@@ -20,6 +20,6 @@ Route::middleware([IsUserAuth::class])->group(function () {
         Route::get('mostrar', 'mostrarCita');
         Route::post('agendar', 'agregarCita');
         Route::put('actualizar/{id}', 'actualizarCita');
-        Route::get('eliminar/{id}', 'eliminarCita');
+        Route::get('cancelar/{id}', 'cancelarCita');
     });
 });

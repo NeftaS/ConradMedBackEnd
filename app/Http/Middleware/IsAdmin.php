@@ -17,7 +17,7 @@ class IsAdmin
     {
         $user = auth('api')->user();
 
-        if($user && $user->role == 'admin'){
+        if($user && $user->role == 'administrador'){
             return $next($request);
         }else{
             return response()->json(['message'=>'Unauthorized: user is not admin'], 401);
