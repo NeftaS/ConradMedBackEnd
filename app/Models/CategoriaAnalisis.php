@@ -5,16 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Doctor extends Model
+class CategoriaAnalisis extends Model
 {
-    //
     use HasFactory;
-    protected $table = 'doctores';
+
+    protected $table = "categoria_analisis";
 
     protected $fillable = [
-        'doctor_nombre',
-        'rol_id'
+        "categoria_nombre"
     ];
-
 
 }

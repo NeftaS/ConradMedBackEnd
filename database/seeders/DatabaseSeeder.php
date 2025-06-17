@@ -4,6 +4,11 @@ namespace Database\Seeders;
 
 use App\Models\Doctor;
 use App\Models\User;
+use App\Models\Role;
+use App\Models\TipoAnalisis;
+use App\Models\CategoriaAnalisis;
+
+
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -20,6 +25,8 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             LugarSeeder::class,
             DoctorSeeder::class,
+            CategoriaASeeder::class,
+            TipoAnSeeder::class,
         ]);
     }
 }
