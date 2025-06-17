@@ -44,5 +44,4 @@ class AnalisisController extends Controller
         return response()->json(['analisis' => $analisis], 200);
     }
 
-    public function
 }
