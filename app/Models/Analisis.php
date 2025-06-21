@@ -15,6 +15,7 @@ class Analisis extends Model
     protected $fillable = [
         "analisis_fecha",
         "analisis_ruta",
+        "cliente_id",
         "categoria_id",
         "tipoanalisis_id",
         "doctor_id"
@@ -30,5 +31,8 @@ class Analisis extends Model
 
     public function doctor(){
         return $this->belongsTo(Doctor::class);
+    }
+    public function user(){
+        return $this->belongsTo(User::class);
     }
 }
