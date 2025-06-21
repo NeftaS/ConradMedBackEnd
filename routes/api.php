@@ -10,7 +10,6 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
 Route::middleware([IsUserAuth::class])->group(function () {
-
     Route::prefix('user')->controller(AuthController::class)->group(function () {
         Route::post('logout', 'logout');
         Route::get('me', 'getUser');
@@ -28,5 +27,7 @@ Route::middleware([IsUserAuth::class])->group(function () {
         Route::post('agendar', 'agregarAnalisis');
         Route::get('mostrar', 'mostrarAnalisis');
         Route::get('mostrar/{id}', 'mostrarAnalisis');
+        Route::put('actualizar/{id}', 'actualizarAnalisis');
+        Route::get('eliminar/{id}', 'eliminarAnalisis');
     });
 });

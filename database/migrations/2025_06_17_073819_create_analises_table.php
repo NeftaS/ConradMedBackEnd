@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->timestamp('analisis_fecha');
             $table->string('analisis_ruta');
+            $table->foreignId('cliente_id')
+                ->constrained('usuarios');
             $table->foreignId('categoria_id')
                 ->constrained('categoria_analisis');
             $table->foreignId('tipoanalisis_id')

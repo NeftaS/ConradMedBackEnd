@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Analisis;
-use GuzzleHttp\Promise\Create;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class AnalisisController extends Controller
@@ -60,4 +58,48 @@ class AnalisisController extends Controller
         return response()->json(['analisis' => $analisis], 200);
     }
 
+    public function actualizarAnalisis(Request $request, $id){
+
+        $validator = Validator::make($request->all(),[
+            "analisis_fecha" => 'required|date_format:Y-m-d H:i:s',
+            "analisis_ruta" => 'required|string',
+            "categoria_id" => 'required|exists:categoria_analisis,id',
+            "tipoanalisis_id" => 'required|exists:tipo_analisis,id',
+            "doctor_id" => 'required|exists:doctores,id'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        $analisis = Analisis::where('id', $id)->first();
+
+        if(!$analisis){
+            return response()->json(['error' => 'Cita no encontrada' ], 404);
+        }
+
+        $analisis->update($request->only([
+            "analisis_fecha",
+            "analisis_ruta",
+            "categoria_id",
+            "tipoanalisis_id",
+            "doctor_id",
+        ]));
+
+        return response()->json(['message' => 'Analisis actualizado correctamente', 'analisis' => $analisis], 200);
+    }
+
+    public function eliminarAnalisis($id)
+    {
+        $analisis = Analisis::find($id);
+
+        if (!$analisis) {
+            return response()->json(['error' => 'Análisis no encontrado'], 404);
+        }
+
+        $analisis->delete();
+
+        return response()->json(['message' => 'Análisis eliminado correctamente'], 200);
+    }
+    
 }
