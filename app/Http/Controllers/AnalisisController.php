@@ -32,7 +32,7 @@ class AnalisisController extends Controller
             "doctor_id" => $request->doctor_id,
         ]);
 
-        return response()->json(['message' => 'Analsis creada correctamente', 'analisis' => $analisis], 201);
+        return response()->json(['message' => 'Analisis creado correctamente', 'analisis' => $analisis], 201);
     }
 
     public function mostrarAnalisis(){
@@ -101,7 +101,7 @@ class AnalisisController extends Controller
 
     public function eliminarAnalisis($id)
     {
-        $userId = Auth::id(); // ID del usuario autenticado
+        $userId = Auth::id(); 
 
         $analisis = Analisis::where('id', $id)
             ->where('cliente_id', $userId)

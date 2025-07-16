@@ -5,9 +5,11 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\AnalisisController;
 use App\Http\Middleware\IsUserAuth;
+use App\Http\Middleware\IsDoctor;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+
 
 Route::middleware([IsUserAuth::class])->group(function () {
     Route::prefix('user')->controller(AuthController::class)->group(function () {
@@ -29,5 +31,12 @@ Route::middleware([IsUserAuth::class])->group(function () {
         Route::get('mostrar/{id}', 'mostrarAnalisisPorId');
         Route::put('actualizar/{id}', 'actualizarAnalisis');
         Route::get('eliminar/{id}', 'eliminarAnalisis');
+    });
+});
+
+Route::middleware([IsUserAuth::class, IsDoctor::class])->group(function () {
+    Route::prefix('doctor')->controller(AuthController::class)->group(function () {
+        Route::post('logout', 'logout');
+        Route::get('me', 'getUser');
     });
 });

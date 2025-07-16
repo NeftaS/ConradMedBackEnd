@@ -13,38 +13,55 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class AuthController extends Controller
 {
-    public function register(Request $request){
-
-
+    public function register(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'nombre' =>'required|string|min:3|max:45',
-            'telefono' =>'required|string|min:10|max:10|unique:usuarios',
-            'email' =>'required|string|email|unique:usuarios',
+            'telefono' =>'required|string|min:10|max:10',
+            'email' =>'required|string|email',
             'password' =>'required|string|min:8|confirmed',
             'rol_id' =>'required|exists:roles,id'
         ]);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 422);
         }
 
-        // return response()->json(['message'=>'Usuario creado correctamente'], 201);
+        $existingUser = User::where(function($query) use ($request) {
+            $query->where('email', $request->email)
+                ->orWhere('telefono', $request->telefono);
+        })->where('rol_id', $request->rol_id)->first();
 
-        $user = User::create([
-            'nombre' => $request->nombre,
-            'telefono' => $request->telefono,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'rol_id' => $request->rol_id
-        ]);
+        if ($existingUser) {
+            return response()->json([
+                'error' => 'Ya existe un usuario con ese correo o teléfono.'
+            ], 409);
+        }
 
+        try {
+            $user = User::create([
+                'nombre' => $request->nombre,
+                'telefono' => $request->telefono,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+                'rol_id' => $request->rol_id
+            ]);
 
+            $token = JWTAuth::fromUser($user);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error al registrar el usuario',
+                'details' => $e->getMessage()
+            ], 500);
+        }
 
         $user->makeHidden(['password']);
 
-        $token = JWTAuth::fromUser($user);
-
-        return response()->json(['message'=>'Usuario creado correctamente', 'user' => $user, 'token' => $token], 201);
+        return response()->json([
+            'message' => 'Usuario creado correctamente',
+            'user' => $user,
+            'token' => $token
+        ], 201);
     }
 
     public function login(Request $request){
