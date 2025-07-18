@@ -6,6 +6,8 @@ use App\Http\Controllers\CitaController;
 use App\Http\Controllers\AnalisisController;
 use App\Http\Middleware\IsUserAuth;
 use App\Http\Middleware\IsDoctor;
+use App\Http\Controllers\ProductosController;
+use League\Csv\Query\Row;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -31,6 +33,11 @@ Route::middleware([IsUserAuth::class])->group(function () {
         Route::get('mostrar/{id}', 'mostrarAnalisisPorId');
         Route::put('actualizar/{id}', 'actualizarAnalisis');
         Route::get('eliminar/{id}', 'eliminarAnalisis');
+    });
+
+    Route::prefix('productos')->controller(ProductosController::class)->group(function(){
+        Route::get('mostrar','mostrarProducto');
+        Route::post('agregar','agregarProducto');
     });
 });
 

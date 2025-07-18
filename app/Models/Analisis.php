@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Analisis extends Model
 {
-
     use HasFactory;
 
     protected $table = "analisis";

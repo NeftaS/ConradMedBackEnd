@@ -103,4 +103,6 @@ class AuthController extends Controller
             return response()->json(['error' => 'No se pudo cerrar sesión, token inválido'], 500);
         }
     }
+
+    
 }
