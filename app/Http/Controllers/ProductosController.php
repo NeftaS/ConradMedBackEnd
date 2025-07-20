@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Productos;
 
@@ -12,7 +11,11 @@ use function Laravel\Prompts\error;
 class ProductosController extends Controller
 {
     public function mostrarProducto(){
-        $productos = Productos::orderBy('Id', 'asc')->get();
+        try {
+            $productos = Productos::orderBy('id', 'asc')->get();
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e], 200);
+        }
 
         return response()->json(['productos' => $productos], 200);
     }
@@ -39,7 +42,6 @@ class ProductosController extends Controller
         }
 
         try {
-            // Crear el producto usando la asignación masiva
             $producto = Productos::create([
                 'id' => $validated->validated()['id'],
                 'clave' => $validated->validated()['clave'],

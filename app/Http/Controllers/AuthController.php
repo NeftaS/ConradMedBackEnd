@@ -67,7 +67,7 @@ class AuthController extends Controller
     public function login(Request $request){
         $validator = Validator::make($request->all(), [
             'telefono' => 'required|string',
-            'password' =>'required|string|min:8',
+            'password' =>'required|string|min:8'
         ]);
 
         if($validator->fails()){
@@ -75,6 +75,7 @@ class AuthController extends Controller
         }
 
         $credentials = $request->only(['telefono', 'password']);
+        $credentials['rol_id'] = 2;
 
         try{
             if(!$token = JWTAuth::attempt($credentials)){
@@ -104,5 +105,30 @@ class AuthController extends Controller
         }
     }
 
-    
+    public function loginDoctor(Request $request){
+        $validator = Validator::make($request->all(), [
+            'telefono' => 'required|string',
+            'password' =>'required|string|min:8'
+        ]);
+
+        if($validator->fails()){
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        $credentials = $request->only(['telefono', 'password']);
+        $credentials['rol_id'] = 3;
+
+        try{
+            if(!$token = JWTAuth::attempt($credentials)){
+                return response()->json(['error' => 'Telefono o contraseña incorrectos'], 401);
+            }
+
+            $user = Auth::user();
+
+            return response()->json(['user' => $user,'token' => $token], 200);
+
+        }catch(JWTException $e){
+            return response()->json(['error' => 'No se puede iniciar sesión, intente más tarde', $e], 500);
+        }
+    }
 }
