@@ -21,7 +21,7 @@ class ProductosController extends Controller
     }
 
     public function agregarProducto(Request $request){
-        // Validar los datos recibidos
+
         $validated = Validator::make($request->all(),[
             'id' => 'required|integer',
             'clave' => 'required|string|max:255',
@@ -36,7 +36,6 @@ class ProductosController extends Controller
             'descripcion' => 'nullable|string',
         ]);
 
-        // Si la validación falla, retornar un error 422
         if ($validated->fails()) {
             return response()->json(['error' => $validated->errors()], 422);
         }
@@ -56,14 +55,12 @@ class ProductosController extends Controller
                 'descripcion' => $validated->validated()['descripcion'] ?? '',
             ]);
         } catch (\Exception $e) {
-            // Capturar cualquier error y devolverlo
             return response()->json([
                 'error' => 'Error al registrar el producto',
                 'details' => $e->getMessage()
             ], 500);
         }
 
-        // Retornar mensaje de éxito con el producto creado
         return response()->json(['message' => 'Producto creado correctamente', 'producto' => $producto], 201);
     }
 

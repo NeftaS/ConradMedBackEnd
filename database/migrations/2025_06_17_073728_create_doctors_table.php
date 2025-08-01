@@ -13,9 +13,13 @@ return new class extends Migration
     {
         Schema::create('doctores', function (Blueprint $table) {
             $table->id();
-            $table->string('doctor_nombre');
-            $table->foreignId('rol_id')
-                ->constrained('roles');
+            $table->string('nombre');
+            $table->string('telefono',10);
+            $table->string('email');
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->string('cedula');
+            $table->string('puntos');
             $table->timestamps();
         });
     }

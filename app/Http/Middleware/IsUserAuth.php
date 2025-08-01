@@ -6,6 +6,8 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 
 class IsUserAuth
 {
@@ -17,10 +19,17 @@ class IsUserAuth
     public function handle(Request $request, Closure $next): Response
     {
         try {
-            if (!JWTAuth::parseToken()->authenticate()) {
+            JWTAuth::setGuard('api');
+            $user = JWTAuth::parseToken()->authenticate();
+            
+            if (!$user) {
                 return response()->json(['error' => 'Usuario no autenticado'], 401);
             }
-        }catch (\Exception $e) {
+        } catch (TokenExpiredException $e) {
+            return response()->json(['error' => 'Token expirado'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['error' => 'Token inválido'], 401);
+        } catch (\Exception $e) {
             return response()->json(['error' => 'Token inválido o expirado'], 401);
         }
 

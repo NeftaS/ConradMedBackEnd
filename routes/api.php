@@ -4,14 +4,16 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\AnalisisController;
+use App\Http\Controllers\DoctorController;
 use App\Http\Middleware\IsUserAuth;
 use App\Http\Middleware\IsDoctor;
 use App\Http\Controllers\ProductosController;
-use League\Csv\Query\Row;
+
+Route::post('login-doctor', [DoctorController::class, 'login']);
+Route::post('register-doctor', [DoctorController::class, 'register']);
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
-Route::post('doctor-login', [AuthController::class, 'loginDoctor']);
 
 Route::middleware([IsUserAuth::class])->group(function () {
     Route::prefix('user')->controller(AuthController::class)->group(function () {
@@ -36,10 +38,10 @@ Route::middleware([IsUserAuth::class])->group(function () {
     });
 });
 
-Route::middleware([IsUserAuth::class, IsDoctor::class])->group(function () {
-    Route::prefix('doctor')->controller(AuthController::class)->group(function () {
-        Route::post('logout', 'logout');
-        Route::get('me', 'getUser');
+Route::middleware([IsDoctor::class])->group(function () {
+    Route::prefix('doctor')->controller(DoctorController::class)->group(function () {
+        Route::get('me', 'getDoctor');
+        Route::put('actualizar', 'updateDoctor');
     });
 });
 

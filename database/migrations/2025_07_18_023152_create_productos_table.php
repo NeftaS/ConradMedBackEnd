@@ -18,13 +18,15 @@ return new class extends Migration
             $table->decimal('precio', 10, 2)->nullable();
             $table->decimal('precio_iva', 10, 2)->nullable();
             $table->string('clave_producto_servicio')->nullable();
+            $table->string('detalles')->nullable();
+            $table->string('indicaciones')->nullable();
+            $table->string('tiempoEntrega')->nullable();
+            $table->string('duracion')->nullable();
+            $table->string('descripcion')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('productos');

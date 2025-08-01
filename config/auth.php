@@ -43,6 +43,10 @@ return [
         'api' => [
             'driver' => 'jwt',
             'provider' => 'users',
+        ],
+        'doctor-api' => [
+            'driver' => 'jwt',   
+            'provider' => 'doctors',
         ]
     ],
 
@@ -67,6 +71,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+        'doctors' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Doctor::class,
         ],
 
         // 'users' => [

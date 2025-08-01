@@ -50,6 +50,4 @@ class ImportarProductos extends Command
 
         $this->info("Importación finalizada.");
     }
-
-
 }
