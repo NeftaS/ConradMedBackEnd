@@ -30,7 +30,7 @@ RUN chown -R www-data:www-data /var/www \
     && chmod -R 755 /var/www/bootstrap/cache
 
 # Exponer puerto
-EXPOSE 9000
+EXPOSE 8000
 
 # Comando por defecto
-CMD ["php-fpm"] 
+CMD ["php-fpm"]
