@@ -1,0 +1,14 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.env
+.nyc_output
+coverage
+.nyc_output
+.phpunit.result.cache
+docker-compose.override.yml
+docker-compose.yml
+Dockerfile
+.dockerignore 

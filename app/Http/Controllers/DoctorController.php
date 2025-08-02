@@ -18,8 +18,8 @@ class DoctorController extends Controller
             'telefono'  => 'required|string|min:10|max:10|unique:doctores',
             'email'     => 'required|string|email|unique:doctores',
             'password'  => 'required|string|min:8|confirmed',
-            'cedula'    => 'string|unique:doctores',
-            'puntos'    => 'nullable|string'
+            'puntos'    => 'nullable|string',
+            'cedula'    => 'required|string|min:10|max:10|unique:doctores'
         ]);
 
         if ($validator->fails()) {
@@ -81,9 +81,20 @@ class DoctorController extends Controller
         }
     }
 
+
     public function getDoctor()
     {
+        try {
+
         $doctor = Auth::guard('doctor-api')->user();
-        return response()->json(['doctor' => $doctor], 200);
+
+            if (!$doctor) {
+                return response()->json(['success' => false, 'error' => 'Usuario no autenticado'], 401);
+            }
+
+            return response()->json(['doctor' => $doctor], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Token inválido o expirado'], 401);
+        }
     }
 }

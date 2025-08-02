@@ -12,6 +12,9 @@ use App\Http\Controllers\ProductosController;
 Route::post('login-doctor', [DoctorController::class, 'login']);
 Route::post('register-doctor', [DoctorController::class, 'register']);
 
+
+
+
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
