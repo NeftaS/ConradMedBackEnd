@@ -1,0 +1,1480 @@
+{
+  "api_name": "ConradMed API",
+  "version": "1.0.0",
+  "base_url": "http://127.0.0.1:8000/api",
+  "description": "API completa del sistema ConradMed con autenticación JWT",
+  "endpoints": {
+    "autenticacion": {
+      "login": {
+        "method": "POST",
+        "url": "/login",
+        "description": "Autenticación de usuario y obtención de token JWT",
+        "headers": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "body": {
+          "email": {
+            "type": "string",
+            "required": true,
+            "description": "Email del usuario"
+          },
+          "password": {
+            "type": "string",
+            "required": true,
+            "description": "Contraseña del usuario"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login exitoso",
+            "body": {
+              "user": {
+                "id": "integer",
+                "nombre": "string",
+                "email": "string"
+              },
+              "token": "string"
+            }
+          },
+          "401": {
+            "description": "Credenciales inválidas",
+            "body": {
+              "error": "string"
+            }
+          },
+          "422": {
+            "description": "Error de validación",
+            "body": {
+              "errors": "object"
+            }
+          }
+        }
+      },
+      "register": {
+        "method": "POST",
+        "url": "/register",
+        "description": "Registro de nuevo usuario",
+        "headers": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "body": {
+          "nombre": {
+            "type": "string",
+            "required": true,
+            "max_length": 45,
+            "description": "Nombre completo del usuario"
+          },
+          "telefono": {
+            "type": "string",
+            "required": true,
+            "length": 10,
+            "unique": true,
+            "description": "Número de teléfono"
+          },
+          "email": {
+            "type": "string",
+            "required": true,
+            "email": true,
+            "unique": true,
+            "description": "Email del usuario"
+          },
+          "password": {
+            "type": "string",
+            "required": true,
+            "min_length": 8,
+            "description": "Contraseña del usuario"
+          },
+          "password_confirmation": {
+            "type": "string",
+            "required": true,
+            "description": "Confirmación de contraseña"
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuario creado exitosamente",
+            "body": {
+              "message": "string",
+              "user": "object",
+              "token": "string"
+            }
+          },
+          "422": {
+            "description": "Error de validación",
+            "body": {
+              "error": "object"
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "body": {
+              "error": "string",
+              "details": "string"
+            }
+          }
+        }
+      }
+    },
+    "usuarios": {
+      "getUser": {
+        "method": "GET",
+        "url": "/user/me",
+        "description": "Obtener información del usuario autenticado",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Accept": "application/json"
+        },
+        "responses": {
+          "200": {
+            "description": "Información del usuario obtenida",
+            "body": "user_object"
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "error": "string"
+            }
+          }
+        }
+      },
+      "logout": {
+        "method": "POST",
+        "url": "/user/logout",
+        "description": "Cerrar sesión del usuario",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Accept": "application/json"
+        },
+        "responses": {
+          "200": {
+            "description": "Sesión cerrada exitosamente",
+            "body": {
+              "message": "string"
+            }
+          },
+          "500": {
+            "description": "Error al cerrar sesión",
+            "body": {
+              "error": "string"
+            }
+          }
+        }
+      }
+    },
+    "doctores": {
+      "loginDoctor": {
+        "method": "POST",
+        "url": "/login-doctor",
+        "description": "Autenticación de doctor",
+        "headers": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "body": {
+          "telefono": {
+            "type": "string",
+            "required": true,
+            "description": "Teléfono del doctor"
+          },
+          "password": {
+            "type": "string",
+            "required": true,
+            "description": "Contraseña del doctor"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login exitoso",
+            "body": {
+              "user": "object",
+              "token": "string"
+            }
+          },
+          "401": {
+            "description": "Credenciales inválidas",
+            "body": {
+              "error": "string"
+            }
+          }
+        }
+      },
+      "registerDoctor": {
+        "method": "POST",
+        "url": "/register-doctor",
+        "description": "Registro de nuevo doctor",
+        "headers": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "body": {
+          "nombre": {
+            "type": "string",
+            "required": true,
+            "description": "Nombre del doctor"
+          },
+          "telefono": {
+            "type": "string",
+            "required": true,
+            "description": "Teléfono del doctor"
+          },
+          "email": {
+            "type": "string",
+            "required": true,
+            "description": "Email del doctor"
+          },
+          "password": {
+            "type": "string",
+            "required": true,
+            "description": "Contraseña del doctor"
+          },
+          "cedula": {
+            "type": "string",
+            "required": true,
+            "description": "Cédula profesional"
+          },
+          "puntos": {
+            "type": "string",
+            "required": true,
+            "description": "Puntos del doctor"
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Doctor registrado exitosamente",
+            "body": {
+              "message": "string",
+              "doctor": "object"
+            }
+          },
+          "422": {
+            "description": "Error de validación",
+            "body": {
+              "error": "object"
+            }
+          }
+        }
+      },
+      "getDoctor": {
+        "method": "GET",
+        "url": "/doctor/me",
+        "description": "Obtener información del doctor autenticado",
+        "authentication": "JWT Doctor required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Accept": "application/json"
+        },
+        "responses": {
+          "200": {
+            "description": "Información del doctor obtenida",
+            "body": "doctor_object"
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "error": "string"
+            }
+          }
+        }
+      },
+      "updateDoctor": {
+        "method": "PUT",
+        "url": "/doctor/actualizar",
+        "description": "Actualizar información del doctor",
+        "authentication": "JWT Doctor required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "body": {
+          "nombre": {
+            "type": "string",
+            "required": false,
+            "description": "Nombre del doctor"
+          },
+          "telefono": {
+            "type": "string",
+            "required": false,
+            "description": "Teléfono del doctor"
+          },
+          "email": {
+            "type": "string",
+            "required": false,
+            "description": "Email del doctor"
+          },
+          "cedula": {
+            "type": "string",
+            "required": false,
+            "description": "Cédula profesional"
+          },
+          "puntos": {
+            "type": "string",
+            "required": false,
+            "description": "Puntos del doctor"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Doctor actualizado exitosamente",
+            "body": {
+              "message": "string",
+              "doctor": "object"
+            }
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "error": "string"
+            }
+          },
+          "422": {
+            "description": "Error de validación",
+            "body": {
+              "error": "object"
+            }
+          }
+        }
+      }
+    },
+    "citas": {
+      "mostrarCita": {
+        "method": "GET",
+        "url": "/cita/mostrar",
+        "description": "Obtener todas las citas del usuario",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Accept": "application/json"
+        },
+        "query_params": {
+          "per_page": {
+            "type": "integer",
+            "required": false,
+            "default": 15,
+            "description": "Número de resultados por página"
+          },
+          "page": {
+            "type": "integer",
+            "required": false,
+            "default": 1,
+            "description": "Número de página"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Citas obtenidas exitosamente",
+            "body": {
+              "citas": "array",
+              "pagination": "object"
+            }
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "error": "string"
+            }
+          }
+        }
+      },
+      "mostrarCitaPorId": {
+        "method": "GET",
+        "url": "/cita/mostrar/{id}",
+        "description": "Obtener una cita específica por ID",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Accept": "application/json"
+        },
+        "path_params": {
+          "id": {
+            "type": "integer",
+            "required": true,
+            "description": "ID de la cita"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cita obtenida exitosamente",
+            "body": "cita_object"
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "error": "string"
+            }
+          },
+          "404": {
+            "description": "Cita no encontrada",
+            "body": {
+              "error": "string"
+            }
+          }
+        }
+      },
+      "agregarCita": {
+        "method": "POST",
+        "url": "/cita/agendar",
+        "description": "Crear una nueva cita",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "body": {
+          "fecha": {
+            "type": "string",
+            "required": true,
+            "format": "YYYY-MM-DD HH:mm:ss",
+            "description": "Fecha y hora de la cita"
+          },
+          "motivo": {
+            "type": "string",
+            "required": true,
+            "description": "Motivo de la cita"
+          },
+          "doctor_id": {
+            "type": "integer",
+            "required": true,
+            "description": "ID del doctor"
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cita creada exitosamente",
+            "body": {
+              "message": "string",
+              "cita": "object"
+            }
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "error": "string"
+            }
+          },
+          "422": {
+            "description": "Error de validación",
+            "body": {
+              "error": "object"
+            }
+          }
+        }
+      },
+      "actualizarCita": {
+        "method": "PUT",
+        "url": "/cita/actualizar/{id}",
+        "description": "Actualizar una cita existente",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "path_params": {
+          "id": {
+            "type": "integer",
+            "required": true,
+            "description": "ID de la cita"
+          }
+        },
+        "body": {
+          "fecha": {
+            "type": "string",
+            "required": false,
+            "format": "YYYY-MM-DD HH:mm:ss",
+            "description": "Nueva fecha y hora de la cita"
+          },
+          "motivo": {
+            "type": "string",
+            "required": false,
+            "description": "Nuevo motivo de la cita"
+          },
+          "doctor_id": {
+            "type": "integer",
+            "required": false,
+            "description": "Nuevo ID del doctor"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cita actualizada exitosamente",
+            "body": {
+              "message": "string",
+              "cita": "object"
+            }
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "error": "string"
+            }
+          },
+          "404": {
+            "description": "Cita no encontrada",
+            "body": {
+              "error": "string"
+            }
+          },
+          "422": {
+            "description": "Error de validación",
+            "body": {
+              "error": "object"
+            }
+          }
+        }
+      },
+      "cancelarCita": {
+        "method": "GET",
+        "url": "/cita/cancelar/{id}",
+        "description": "Cancelar una cita",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Accept": "application/json"
+        },
+        "path_params": {
+          "id": {
+            "type": "integer",
+            "required": true,
+            "description": "ID de la cita"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cita cancelada exitosamente",
+            "body": {
+              "message": "string"
+            }
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "error": "string"
+            }
+          },
+          "404": {
+            "description": "Cita no encontrada",
+            "body": {
+              "error": "string"
+            }
+          }
+        }
+      }
+    },
+    "analisis": {
+      "mostrarAnalisis": {
+        "method": "GET",
+        "url": "/analisis/mostrar",
+        "description": "Obtener todos los análisis del usuario",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Accept": "application/json"
+        },
+        "query_params": {
+          "per_page": {
+            "type": "integer",
+            "required": false,
+            "default": 15,
+            "description": "Número de resultados por página"
+          },
+          "page": {
+            "type": "integer",
+            "required": false,
+            "default": 1,
+            "description": "Número de página"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Análisis obtenidos exitosamente",
+            "body": {
+              "analisis": "array",
+              "pagination": "object"
+            }
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "error": "string"
+            }
+          }
+        }
+      },
+      "mostrarAnalisisPorId": {
+        "method": "GET",
+        "url": "/analisis/mostrar/{id}",
+        "description": "Obtener un análisis específico por ID",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Accept": "application/json"
+        },
+        "path_params": {
+          "id": {
+            "type": "integer",
+            "required": true,
+            "description": "ID del análisis"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Análisis obtenido exitosamente",
+            "body": "analisis_object"
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "error": "string"
+            }
+          },
+          "404": {
+            "description": "Análisis no encontrado",
+            "body": {
+              "error": "string"
+            }
+          }
+        }
+      },
+      "agregarAnalisis": {
+        "method": "POST",
+        "url": "/analisis/agendar",
+        "description": "Crear un nuevo análisis",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "body": {
+          "fecha": {
+            "type": "string",
+            "required": true,
+            "format": "YYYY-MM-DD HH:mm:ss",
+            "description": "Fecha y hora del análisis"
+          },
+          "tipo_analisis_id": {
+            "type": "integer",
+            "required": true,
+            "description": "ID del tipo de análisis"
+          },
+          "lugar_id": {
+            "type": "integer",
+            "required": true,
+            "description": "ID del lugar"
+          },
+          "observaciones": {
+            "type": "string",
+            "required": false,
+            "description": "Observaciones adicionales"
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Análisis creado exitosamente",
+            "body": {
+              "message": "string",
+              "analisis": "object"
+            }
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "error": "string"
+            }
+          },
+          "422": {
+            "description": "Error de validación",
+            "body": {
+              "error": "object"
+            }
+          }
+        }
+      },
+      "actualizarAnalisis": {
+        "method": "PUT",
+        "url": "/analisis/actualizar/{id}",
+        "description": "Actualizar un análisis existente",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "path_params": {
+          "id": {
+            "type": "integer",
+            "required": true,
+            "description": "ID del análisis"
+          }
+        },
+        "body": {
+          "fecha": {
+            "type": "string",
+            "required": false,
+            "format": "YYYY-MM-DD HH:mm:ss",
+            "description": "Nueva fecha y hora del análisis"
+          },
+          "tipo_analisis_id": {
+            "type": "integer",
+            "required": false,
+            "description": "Nuevo ID del tipo de análisis"
+          },
+          "lugar_id": {
+            "type": "integer",
+            "required": false,
+            "description": "Nuevo ID del lugar"
+          },
+          "observaciones": {
+            "type": "string",
+            "required": false,
+            "description": "Nuevas observaciones"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Análisis actualizado exitosamente",
+            "body": {
+              "message": "string",
+              "analisis": "object"
+            }
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "error": "string"
+            }
+          },
+          "404": {
+            "description": "Análisis no encontrado",
+            "body": {
+              "error": "string"
+            }
+          },
+          "422": {
+            "description": "Error de validación",
+            "body": {
+              "error": "object"
+            }
+          }
+        }
+      },
+      "eliminarAnalisis": {
+        "method": "GET",
+        "url": "/analisis/eliminar/{id}",
+        "description": "Eliminar un análisis",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Accept": "application/json"
+        },
+        "path_params": {
+          "id": {
+            "type": "integer",
+            "required": true,
+            "description": "ID del análisis"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Análisis eliminado exitosamente",
+            "body": {
+              "message": "string"
+            }
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "error": "string"
+            }
+          },
+          "404": {
+            "description": "Análisis no encontrado",
+            "body": {
+              "error": "string"
+            }
+          }
+        }
+      }
+    },
+    "productos": {
+      "mostrarProducto": {
+        "method": "GET",
+        "url": "/productos/mostrar",
+        "description": "Obtener todos los productos",
+        "authentication": "No required",
+        "headers": {
+          "Accept": "application/json"
+        },
+        "query_params": {
+          "per_page": {
+            "type": "integer",
+            "required": false,
+            "default": 15,
+            "description": "Número de resultados por página"
+          },
+          "page": {
+            "type": "integer",
+            "required": false,
+            "default": 1,
+            "description": "Número de página"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Productos obtenidos exitosamente",
+            "body": {
+              "productos": "array",
+              "pagination": "object"
+            }
+          }
+        }
+      },
+      "agregarProducto": {
+        "method": "POST",
+        "url": "/productos/agregar",
+        "description": "Crear un nuevo producto",
+        "authentication": "No required",
+        "headers": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "body": {
+          "nombre": {
+            "type": "string",
+            "required": true,
+            "description": "Nombre del producto"
+          },
+          "descripcion": {
+            "type": "string",
+            "required": false,
+            "description": "Descripción del producto"
+          },
+          "precio": {
+            "type": "numeric",
+            "required": true,
+            "description": "Precio del producto"
+          },
+          "categoria": {
+            "type": "string",
+            "required": false,
+            "description": "Categoría del producto"
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Producto creado exitosamente",
+            "body": {
+              "message": "string",
+              "producto": "object"
+            }
+          },
+          "422": {
+            "description": "Error de validación",
+            "body": {
+              "error": "object"
+            }
+          }
+        }
+      }
+    },
+    "ordenes": {
+      "index": {
+        "method": "GET",
+        "url": "/ordenes",
+        "description": "Obtener todas las órdenes con filtros y paginación",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Accept": "application/json"
+        },
+        "query_params": {
+          "medico": {
+            "type": "string",
+            "required": false,
+            "description": "Filtrar por nombre del médico"
+          },
+          "paciente": {
+            "type": "string",
+            "required": false,
+            "description": "Filtrar por nombre del paciente"
+          },
+          "tipo": {
+            "type": "string",
+            "required": false,
+            "description": "Filtrar por tipo de orden"
+          },
+          "urgencia": {
+            "type": "string",
+            "required": false,
+            "enum": ["BAJA", "MEDIA", "ALTA", "CRITICA"],
+            "description": "Filtrar por nivel de urgencia"
+          },
+          "fecha": {
+            "type": "string",
+            "required": false,
+            "format": "YYYY-MM-DD",
+            "description": "Filtrar por fecha específica"
+          },
+          "fecha_inicio": {
+            "type": "string",
+            "required": false,
+            "format": "YYYY-MM-DD",
+            "description": "Fecha de inicio para rango"
+          },
+          "fecha_fin": {
+            "type": "string",
+            "required": false,
+            "format": "YYYY-MM-DD",
+            "description": "Fecha de fin para rango"
+          },
+          "per_page": {
+            "type": "integer",
+            "required": false,
+            "default": 15,
+            "description": "Número de resultados por página"
+          },
+          "page": {
+            "type": "integer",
+            "required": false,
+            "default": 1,
+            "description": "Número de página"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Órdenes obtenidas exitosamente",
+            "body": {
+              "success": true,
+              "data": {
+                "current_page": "integer",
+                "data": "array",
+                "total": "integer",
+                "per_page": "integer"
+              },
+              "message": "string",
+              "user_info": {
+                "id": "integer",
+                "nombre": "string",
+                "email": "string"
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          }
+        }
+      },
+      "show": {
+        "method": "GET",
+        "url": "/ordenes/{id}",
+        "description": "Obtener una orden específica por ID",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Accept": "application/json"
+        },
+        "path_params": {
+          "id": {
+            "type": "integer",
+            "required": true,
+            "description": "ID de la orden"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Orden obtenida exitosamente",
+            "body": {
+              "success": true,
+              "data": "orden_object",
+              "message": "string"
+            }
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          },
+          "404": {
+            "description": "Orden no encontrada",
+            "body": {
+              "success": false,
+              "message": "string"
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          }
+        }
+      },
+      "store": {
+        "method": "POST",
+        "url": "/ordenes",
+        "description": "Crear una nueva orden médica",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "body": {
+          "Orden_NombreMedico": {
+            "type": "string",
+            "required": true,
+            "max_length": 255,
+            "description": "Nombre completo del médico"
+          },
+          "Orden_Cedula": {
+            "type": "string",
+            "required": true,
+            "max_length": 255,
+            "description": "Cédula profesional del médico"
+          },
+          "Orden_NombrePaciente": {
+            "type": "string",
+            "required": true,
+            "max_length": 255,
+            "description": "Nombre completo del paciente"
+          },
+          "Orden_Celular": {
+            "type": "string",
+            "required": true,
+            "max_length": 20,
+            "description": "Número de celular del paciente"
+          },
+          "Orden_Correo": {
+            "type": "string",
+            "required": true,
+            "max_length": 255,
+            "email": true,
+            "description": "Correo electrónico del paciente"
+          },
+          "Orden_Fecha": {
+            "type": "string",
+            "required": true,
+            "format": "YYYY-MM-DD HH:mm:ss",
+            "description": "Fecha programada de la orden"
+          },
+          "Orden_Diagnostico": {
+            "type": "string",
+            "required": true,
+            "max_length": 255,
+            "description": "Diagnóstico del paciente"
+          },
+          "Orden_Tipo": {
+            "type": "string",
+            "required": true,
+            "max_length": 100,
+            "description": "Tipo de orden médica"
+          },
+          "Orden_Descripcion": {
+            "type": "string",
+            "required": true,
+            "description": "Descripción detallada de la orden"
+          },
+          "Orden_Observaciones": {
+            "type": "string",
+            "required": false,
+            "description": "Observaciones adicionales"
+          },
+          "Orden_NivelUrgencia": {
+            "type": "string",
+            "required": true,
+            "enum": ["BAJA", "MEDIA", "ALTA", "CRITICA"],
+            "description": "Nivel de urgencia de la orden"
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Orden creada exitosamente",
+            "body": {
+              "success": true,
+              "data": "orden_object",
+              "message": "string"
+            }
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          },
+          "422": {
+            "description": "Error de validación",
+            "body": {
+              "success": false,
+              "message": "string",
+              "errors": "object"
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          }
+        }
+      },
+      "update": {
+        "method": "PUT",
+        "url": "/ordenes/{id}",
+        "description": "Actualizar una orden existente",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "path_params": {
+          "id": {
+            "type": "integer",
+            "required": true,
+            "description": "ID de la orden"
+          }
+        },
+        "body": {
+          "Orden_NombreMedico": {
+            "type": "string",
+            "required": false,
+            "max_length": 255,
+            "description": "Nombre completo del médico"
+          },
+          "Orden_Cedula": {
+            "type": "string",
+            "required": false,
+            "max_length": 255,
+            "description": "Cédula profesional del médico"
+          },
+          "Orden_NombrePaciente": {
+            "type": "string",
+            "required": false,
+            "max_length": 255,
+            "description": "Nombre completo del paciente"
+          },
+          "Orden_Celular": {
+            "type": "string",
+            "required": false,
+            "max_length": 20,
+            "description": "Número de celular del paciente"
+          },
+          "Orden_Correo": {
+            "type": "string",
+            "required": false,
+            "max_length": 255,
+            "email": true,
+            "description": "Correo electrónico del paciente"
+          },
+          "Orden_Fecha": {
+            "type": "string",
+            "required": false,
+            "format": "YYYY-MM-DD HH:mm:ss",
+            "description": "Fecha programada de la orden"
+          },
+          "Orden_Diagnostico": {
+            "type": "string",
+            "required": false,
+            "max_length": 255,
+            "description": "Diagnóstico del paciente"
+          },
+          "Orden_Tipo": {
+            "type": "string",
+            "required": false,
+            "max_length": 100,
+            "description": "Tipo de orden médica"
+          },
+          "Orden_Descripcion": {
+            "type": "string",
+            "required": false,
+            "description": "Descripción detallada de la orden"
+          },
+          "Orden_Observaciones": {
+            "type": "string",
+            "required": false,
+            "description": "Observaciones adicionales"
+          },
+          "Orden_NivelUrgencia": {
+            "type": "string",
+            "required": false,
+            "enum": ["BAJA", "MEDIA", "ALTA", "CRITICA"],
+            "description": "Nivel de urgencia de la orden"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Orden actualizada exitosamente",
+            "body": {
+              "success": true,
+              "data": "orden_object",
+              "message": "string"
+            }
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          },
+          "404": {
+            "description": "Orden no encontrada",
+            "body": {
+              "success": false,
+              "message": "string"
+            }
+          },
+          "422": {
+            "description": "Error de validación",
+            "body": {
+              "success": false,
+              "message": "string",
+              "errors": "object"
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          }
+        }
+      },
+      "destroy": {
+        "method": "DELETE",
+        "url": "/ordenes/{id}",
+        "description": "Eliminar una orden",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Accept": "application/json"
+        },
+        "path_params": {
+          "id": {
+            "type": "integer",
+            "required": true,
+            "description": "ID de la orden"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Orden eliminada exitosamente",
+            "body": {
+              "success": true,
+              "message": "string"
+            }
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          },
+          "404": {
+            "description": "Orden no encontrada",
+            "body": {
+              "success": false,
+              "message": "string"
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          }
+        }
+      },
+      "estadisticas": {
+        "method": "GET",
+        "url": "/ordenes/estadisticas",
+        "description": "Obtener estadísticas de las órdenes",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Accept": "application/json"
+        },
+        "responses": {
+          "200": {
+            "description": "Estadísticas obtenidas exitosamente",
+            "body": {
+              "success": true,
+              "data": {
+                "total_ordenes": "integer",
+                "ordenes_hoy": "integer",
+                "ordenes_urgentes": "integer",
+                "por_tipo": "array",
+                "por_urgencia": "array"
+              },
+              "message": "string"
+            }
+          },
+          "401": {
+            "description": "No autorizado",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          }
+        }
+      },
+      "refreshToken": {
+        "method": "POST",
+        "url": "/ordenes/refresh-token",
+        "description": "Refrescar el token JWT",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Accept": "application/json"
+        },
+        "responses": {
+          "200": {
+            "description": "Token refrescado exitosamente",
+            "body": {
+              "success": true,
+              "message": "string",
+              "data": {
+                "token": "string",
+                "token_type": "string",
+                "expires_in": "integer"
+              }
+            }
+          },
+          "401": {
+            "description": "No se pudo refrescar el token",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          }
+        }
+      },
+      "logout": {
+        "method": "POST",
+        "url": "/ordenes/logout",
+        "description": "Cerrar sesión e invalidar token",
+        "authentication": "JWT required",
+        "headers": {
+          "Authorization": "Bearer {JWT_TOKEN}",
+          "Accept": "application/json"
+        },
+        "responses": {
+          "200": {
+            "description": "Sesión cerrada exitosamente",
+            "body": {
+              "success": true,
+              "message": "string"
+            }
+          },
+          "500": {
+            "description": "Error al cerrar sesión",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "status_codes": {
+    "200": "OK - Operación exitosa",
+    "201": "Created - Recurso creado exitosamente",
+    "400": "Bad Request - Solicitud incorrecta",
+    "401": "Unauthorized - No autorizado (token inválido, expirado o faltante)",
+    "403": "Forbidden - Prohibido",
+    "404": "Not Found - Recurso no encontrado",
+    "422": "Unprocessable Entity - Error de validación",
+    "429": "Too Many Requests - Demasiadas solicitudes",
+    "500": "Internal Server Error - Error interno del servidor",
+    "502": "Bad Gateway - Error de puerta de enlace",
+    "503": "Service Unavailable - Servicio no disponible"
+  },
+  "authentication": {
+    "type": "JWT Bearer Token",
+    "header": "Authorization: Bearer {JWT_TOKEN}",
+    "description": "La mayoría de endpoints requieren autenticación JWT. El token se obtiene mediante el endpoint de login.",
+    "token_lifetime": "60 minutos (configurable)",
+    "refresh": "Disponible en /ordenes/refresh-token"
+  },
+  "pagination": {
+    "default_per_page": 15,
+    "max_per_page": 100,
+    "response_format": {
+      "current_page": "integer",
+      "data": "array",
+      "total": "integer",
+      "per_page": "integer",
+      "last_page": "integer",
+      "from": "integer",
+      "to": "integer"
+    }
+  },
+  "error_format": {
+    "success": false,
+    "message": "Descripción del error",
+    "error": "Detalles del error (opcional)",
+    "errors": "Objeto con errores de validación (opcional)"
+  },
+  "success_format": {
+    "success": true,
+    "message": "Descripción del éxito",
+    "data": "Datos de la respuesta (opcional)"
+  },
+  "notes": [
+    "Todos los endpoints que requieren autenticación devuelven 401 si no se proporciona un token válido",
+    "Los endpoints de órdenes incluyen información del usuario autenticado en las respuestas",
+    "Los filtros de fecha aceptan formato YYYY-MM-DD",
+    "Los niveles de urgencia son: BAJA, MEDIA, ALTA, CRITICA",
+    "Los endpoints de análisis y citas están protegidos por autenticación JWT",
+    "Los productos no requieren autenticación",
+    "Todos los endpoints incluyen manejo de errores estandarizado",
+    "Los logs de todas las operaciones se registran para auditoría"
+  ]
+}

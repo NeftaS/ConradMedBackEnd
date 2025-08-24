@@ -8,6 +8,7 @@ use App\Http\Controllers\DoctorController;
 use App\Http\Middleware\IsUserAuth;
 use App\Http\Middleware\IsDoctor;
 use App\Http\Controllers\ProductosController;
+use App\Http\Controllers\OrdenController;
 
 Route::post('login-doctor', [DoctorController::class, 'login']);
 Route::post('register-doctor', [DoctorController::class, 'register']);
@@ -51,4 +52,17 @@ Route::middleware([IsDoctor::class])->group(function () {
 Route::prefix('productos')->controller(ProductosController::class)->group(function(){
     Route::get('mostrar','mostrarProducto');
     Route::post('agregar','agregarProducto');
+});
+
+Route::prefix('ordenes')->controller(OrdenController::class)->group(function(){
+    Route::get('/', 'index');
+    Route::get('/estadisticas', 'estadisticas');
+    Route::get('/{id}', 'show');
+    Route::post('/', 'store');
+    Route::put('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+    
+    // Endpoints JWT
+    Route::post('/refresh-token', 'refreshToken');
+    Route::post('/logout', 'logout');
 });
