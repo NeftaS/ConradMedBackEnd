@@ -8,21 +8,18 @@
       "login": {
         "method": "POST",
         "url": "/login",
-        "description": "Autenticación de usuario y obtención de token JWT",
+        "description": "Autenticación de usuario solo con teléfono y obtención de token JWT",
         "headers": {
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
         "body": {
-          "email": {
+          "telefono": {
             "type": "string",
             "required": true,
-            "description": "Email del usuario"
-          },
-          "password": {
-            "type": "string",
-            "required": true,
-            "description": "Contraseña del usuario"
+            "min_length": 10,
+            "max_length": 10,
+            "description": "Número de teléfono del usuario"
           }
         },
         "responses": {
@@ -32,6 +29,7 @@
               "user": {
                 "id": "integer",
                 "nombre": "string",
+                "telefono": "string",
                 "email": "string"
               },
               "token": "string"

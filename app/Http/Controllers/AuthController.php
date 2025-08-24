@@ -53,27 +53,33 @@ class AuthController extends Controller
 
     public function login(Request $request){
         $validator = Validator::make($request->all(), [
-            'telefono' => 'required|string',
-            'password' =>'required|string|min:8'
+            'telefono' => 'required|string|min:10|max:10'
         ]);
 
         if($validator->fails()){
             return response()->json(['error' => $validator->errors()], 422);
         }
 
-        $credentials = $request->only(['telefono', 'password']);
-
         try{
-            if(!$token = JWTAuth::attempt($credentials)){
-                return response()->json(['error' => 'Telefono o contraseña incorrectos'], 401);
+            // Buscar usuario por teléfono
+            $user = User::where('telefono', $request->telefono)->first();
+            
+            if(!$user){
+                return response()->json(['error' => 'Teléfono no registrado en el sistema'], 401);
             }
 
-            $user = Auth::user();
+            // Generar token JWT directamente sin verificar contraseña
+            $token = JWTAuth::fromUser($user);
+            
+            $user->makeHidden(['password']);
 
-            return response()->json(['user' => $user,'token' => $token], 200);
+            return response()->json([
+                'user' => $user,
+                'token' => $token
+            ], 200);
 
         }catch(JWTException $e){
-            return response()->json(['error' => 'No se puede iniciar sesión, intente más tarde', $e], 500);
+            return response()->json(['error' => 'No se puede iniciar sesión, intente más tarde'], 500);
         }
     }
 
