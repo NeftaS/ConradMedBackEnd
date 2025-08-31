@@ -232,7 +232,7 @@ class OrdenController extends Controller
                 'Orden_Tipo' => 'sometimes|required|string|max:100',
                 'Orden_Descripcion' => 'sometimes|required|string',
                 'Orden_Observaciones' => 'nullable|string',
-                'Orden_NivelUrgencia' => 'sometimes|required|string|in:BAJA,MEDIA,ALTA,CRITICA'
+                'Orden_NivelUrgencia' => 'sometimes|required|string|in:Ordinaria,Urgente'
             ]);
 
             if ($validator->fails()) {

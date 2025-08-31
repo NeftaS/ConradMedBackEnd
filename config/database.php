@@ -111,6 +111,17 @@ return [
             // 'encrypt' => env('DB_ENCRYPT', 'yes'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
+        'render_pgsql' => [
+            'driver' => env('RENDER_DB_CONNECTION', 'pgsql'),
+            'host' => env('RENDER_DB_HOST'),
+            'port' => env('RENDER_DB_PORT', 5432),
+            'database' => env('RENDER_DB_DATABASE'),
+            'username' => env('RENDER_DB_USERNAME'),
+            'password' => env('RENDER_DB_PASSWORD'),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'schema' => 'public',
+        ],
 
     ],
 

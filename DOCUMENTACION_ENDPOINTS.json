@@ -803,18 +803,38 @@
     "productos": {
       "mostrarProducto": {
         "method": "GET",
-        "url": "/productos/mostrar",
-        "description": "Obtener todos los productos",
+        "url": "/productos",
+        "description": "Obtener todos los productos con filtros y paginación",
         "authentication": "No required",
         "headers": {
           "Accept": "application/json"
         },
         "query_params": {
+          "nombre": {
+            "type": "string",
+            "required": false,
+            "description": "Filtrar por nombre del producto"
+          },
+          "precio_min": {
+            "type": "numeric",
+            "required": false,
+            "description": "Precio mínimo"
+          },
+          "precio_max": {
+            "type": "numeric",
+            "required": false,
+            "description": "Precio máximo"
+          },
+          "con_iva": {
+            "type": "boolean",
+            "required": false,
+            "description": "Solo productos con IVA"
+          },
           "per_page": {
             "type": "integer",
             "required": false,
             "default": 15,
-            "description": "Número de resultados por página"
+            "description": "Productos por página"
           },
           "page": {
             "type": "integer",
@@ -827,15 +847,70 @@
           "200": {
             "description": "Productos obtenidos exitosamente",
             "body": {
-              "productos": "array",
-              "pagination": "object"
+              "success": true,
+              "data": {
+                "current_page": "integer",
+                "data": "array",
+                "total": "integer",
+                "per_page": "integer"
+              },
+              "message": "string"
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          }
+        }
+      },
+      "mostrarProductoPorId": {
+        "method": "GET",
+        "url": "/productos/{id}",
+        "description": "Obtener un producto específico por ID",
+        "authentication": "No required",
+        "headers": {
+          "Accept": "application/json"
+        },
+        "path_params": {
+          "id": {
+            "type": "integer",
+            "required": true,
+            "description": "ID del producto"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Producto obtenido exitosamente",
+            "body": {
+              "success": true,
+              "data": "producto_object",
+              "message": "string"
+            }
+          },
+          "404": {
+            "description": "Producto no encontrado",
+            "body": {
+              "success": false,
+              "message": "string"
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
             }
           }
         }
       },
       "agregarProducto": {
         "method": "POST",
-        "url": "/productos/agregar",
+        "url": "/productos",
         "description": "Crear un nuevo producto",
         "authentication": "No required",
         "headers": {
@@ -843,39 +918,319 @@
           "Accept": "application/json"
         },
         "body": {
-          "nombre": {
+          "id": {
+            "type": "integer",
+            "required": true,
+            "unique": true,
+            "description": "ID único del producto"
+          },
+          "clave": {
             "type": "string",
             "required": true,
-            "description": "Nombre del producto"
+            "max_length": 255,
+            "description": "Clave del producto"
           },
-          "descripcion": {
+          "producto": {
             "type": "string",
-            "required": false,
-            "description": "Descripción del producto"
+            "required": true,
+            "max_length": 255,
+            "description": "Nombre del producto"
           },
           "precio": {
             "type": "numeric",
             "required": true,
-            "description": "Precio del producto"
+            "min": 0,
+            "description": "Precio sin IVA"
           },
-          "categoria": {
+          "precio_iva": {
+            "type": "numeric",
+            "required": true,
+            "min": 0,
+            "description": "Precio con IVA"
+          },
+          "clave_producto_servicio": {
+            "type": "string",
+            "required": true,
+            "max_length": 255,
+            "description": "Clave de producto/servicio"
+          },
+          "detalles": {
             "type": "string",
             "required": false,
-            "description": "Categoría del producto"
+            "description": "Detalles del producto"
+          },
+          "indicaciones": {
+            "type": "string",
+            "required": false,
+            "description": "Indicaciones de uso"
+          },
+          "tiempoEntrega": {
+            "type": "string",
+            "required": false,
+            "max_length": 255,
+            "description": "Tiempo de entrega"
+          },
+          "duracion": {
+            "type": "string",
+            "required": false,
+            "max_length": 255,
+            "description": "Duración del tratamiento"
+          },
+          "descripcion": {
+            "type": "string",
+            "required": false,
+            "description": "Descripción general"
           }
         },
         "responses": {
           "201": {
             "description": "Producto creado exitosamente",
             "body": {
-              "message": "string",
-              "producto": "object"
+              "success": true,
+              "data": "producto_object",
+              "message": "string"
             }
           },
           "422": {
             "description": "Error de validación",
             "body": {
-              "error": "object"
+              "success": false,
+              "message": "string",
+              "errors": "object"
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          }
+        }
+      },
+      "actualizarProducto": {
+        "method": "PUT",
+        "url": "/productos/{id}",
+        "description": "Actualizar un producto existente",
+        "authentication": "No required",
+        "headers": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "path_params": {
+          "id": {
+            "type": "integer",
+            "required": true,
+            "description": "ID del producto"
+          }
+        },
+        "body": {
+          "clave": {
+            "type": "string",
+            "required": false,
+            "max_length": 255,
+            "description": "Clave del producto"
+          },
+          "producto": {
+            "type": "string",
+            "required": false,
+            "max_length": 255,
+            "description": "Nombre del producto"
+          },
+          "precio": {
+            "type": "numeric",
+            "required": false,
+            "min": 0,
+            "description": "Precio sin IVA"
+          },
+          "precio_iva": {
+            "type": "numeric",
+            "required": false,
+            "min": 0,
+            "description": "Precio con IVA"
+          },
+          "clave_producto_servicio": {
+            "type": "string",
+            "required": false,
+            "max_length": 255,
+            "description": "Clave de producto/servicio"
+          },
+          "detalles": {
+            "type": "string",
+            "required": false,
+            "description": "Detalles del producto"
+          },
+          "indicaciones": {
+            "type": "string",
+            "required": false,
+            "description": "Indicaciones de uso"
+          },
+          "tiempoEntrega": {
+            "type": "string",
+            "required": false,
+            "max_length": 255,
+            "description": "Tiempo de entrega"
+          },
+          "duracion": {
+            "type": "string",
+            "required": false,
+            "max_length": 255,
+            "description": "Duración del tratamiento"
+          },
+          "descripcion": {
+            "type": "string",
+            "required": false,
+            "description": "Descripción general"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Producto actualizado exitosamente",
+            "body": {
+              "success": true,
+              "data": "producto_object",
+              "message": "string"
+            }
+          },
+          "404": {
+            "description": "Producto no encontrado",
+            "body": {
+              "success": false,
+              "message": "string"
+            }
+          },
+          "422": {
+            "description": "Error de validación",
+            "body": {
+              "success": false,
+              "message": "string",
+              "errors": "object"
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          }
+        }
+      },
+      "eliminarProducto": {
+        "method": "DELETE",
+        "url": "/productos/{id}",
+        "description": "Eliminar un producto",
+        "authentication": "No required",
+        "headers": {
+          "Accept": "application/json"
+        },
+        "path_params": {
+          "id": {
+            "type": "integer",
+            "required": true,
+            "description": "ID del producto"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Producto eliminado exitosamente",
+            "body": {
+              "success": true,
+              "message": "string"
+            }
+          },
+          "404": {
+            "description": "Producto no encontrado",
+            "body": {
+              "success": false,
+              "message": "string"
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          }
+        }
+      },
+      "buscarProductos": {
+        "method": "GET",
+        "url": "/productos/buscar",
+        "description": "Buscar productos por nombre",
+        "authentication": "No required",
+        "headers": {
+          "Accept": "application/json"
+        },
+        "query_params": {
+          "nombre": {
+            "type": "string",
+            "required": true,
+            "min_length": 2,
+            "max_length": 255,
+            "description": "Nombre a buscar"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Búsqueda completada exitosamente",
+            "body": {
+              "success": true,
+              "data": "array",
+              "message": "string"
+            }
+          },
+          "422": {
+            "description": "Error de validación",
+            "body": {
+              "success": false,
+              "message": "string",
+              "errors": "object"
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
+            }
+          }
+        }
+      },
+      "estadisticas": {
+        "method": "GET",
+        "url": "/productos/estadisticas",
+        "description": "Obtener estadísticas de productos",
+        "authentication": "No required",
+        "headers": {
+          "Accept": "application/json"
+        },
+        "responses": {
+          "200": {
+            "description": "Estadísticas obtenidas exitosamente",
+            "body": {
+              "success": true,
+              "data": {
+                "total_productos": "integer",
+                "productos_con_iva": "integer",
+                "precio_promedio": "numeric",
+                "precio_maximo": "numeric",
+                "precio_minimo": "numeric"
+              },
+              "message": "string"
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "body": {
+              "success": false,
+              "message": "string",
+              "error": "string"
             }
           }
         }
