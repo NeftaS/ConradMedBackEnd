@@ -14,7 +14,6 @@ use App\Http\Controllers\EmailController;
 Route::post('login-doctor', [DoctorController::class, 'login']);
 Route::post('register-doctor', [DoctorController::class, 'register']);
 
-
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
@@ -32,13 +31,7 @@ Route::middleware([IsUserAuth::class])->group(function () {
         Route::get('cancelar/{id}', 'cancelarCita');
     });
 
-    Route::prefix('analisis')->controller(AnalisisController::class)->group(function () {
-        Route::post('agendar', 'agregarAnalisis');
-        Route::get('mostrar', 'mostrarAnalisis');
-        Route::get('mostrar/{id}', 'mostrarAnalisisPorId');
-        Route::put('actualizar/{id}', 'actualizarAnalisis');
-        Route::get('eliminar/{id}', 'eliminarAnalisis');
-    });
+ 
 });
 
 Route::middleware([IsDoctor::class])->group(function () {
@@ -55,17 +48,24 @@ Route::middleware([IsDoctor::class])->group(function () {
         Route::put('/{id}', 'update');
         Route::delete('/{id}', 'destroy');
         
-        // Endpoints JWT
         Route::post('/refresh-token', 'refreshToken');
         Route::post('/logout', 'logout');
     });
 
-    Route::prefix('email')->controller(EmailController::class)->group(function(){
-        Route::get('/check', 'checkEmailService');
-        Route::post('/welcome', 'sendWelcomeEmail');
-        Route::post('/cita-confirmation', 'sendCitaConfirmation');
-        Route::post('/orden-confirmation', 'sendOrdenConfirmation');
-        Route::post('/custom', 'sendCustomEmail');
+    Route::prefix('cita')->controller(CitaController::class)->group(function () {
+        Route::get('/{id}', 'mostrarCitaPorId');
+        Route::get('/', 'mostrarCita');
+        Route::post('/', 'agregarCita');
+        Route::put('/{id}', 'actualizarCita');
+        Route::get('/{id}', 'cancelarCita');
+    });
+
+    Route::prefix('analisis')->controller(AnalisisController::class)->group(function () {
+        Route::post('/', 'agregarAnalisis');
+        Route::get('/', 'mostrarAnalisis');
+        Route::get('/{id}', 'mostrarAnalisisPorId');
+        Route::put('/{id}', 'actualizarAnalisis');
+        Route::get('/{id}', 'eliminarAnalisis');
     });
 });
 
@@ -77,3 +77,5 @@ Route::prefix('productos')->controller(ProductosController::class)->group(functi
     Route::put('/{id}', 'actualizarProducto');
     Route::delete('/{id}', 'eliminarProducto');
 });
+
+Route::get('/enviar-prueba', [EmailController::class, 'sendWelcomeEmail']);
