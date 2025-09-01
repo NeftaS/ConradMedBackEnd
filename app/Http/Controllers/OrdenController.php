@@ -3,63 +3,57 @@
 namespace App\Http\Controllers;
 
 use App\Models\Orden;
-use App\Models\User;
+use App\Models\Doctor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Facades\Auth;
 
 class OrdenController extends Controller
 {
     /**
-     * Obtener el usuario autenticado desde el token JWT
+     * Obtener el doctor autenticado
      */
-    private function getAuthenticatedUser()
+    private function getAuthenticatedDoctor()
     {
-        try {
-            if (!$user = JWTAuth::parseToken()->authenticate()) {
-                return null;
-            }
-            return $user;
-        } catch (JWTException $e) {
-            return null;
-        }
+        return Auth::guard('doctor-api')->user();
     }
 
     /**
-     * Verificar si el usuario está autenticado
+     * Verificar si el doctor está autenticado
      */
     private function checkAuthentication()
     {
-        $user = $this->getAuthenticatedUser();
-        if (!$user) {
+        $doctor = $this->getAuthenticatedDoctor();
+        if (!$doctor) {
             return response()->json([
                 'success' => false,
                 'message' => 'No autorizado',
                 'error' => 'Token de autenticación inválido o expirado'
             ], 401);
         }
-        return $user;
+        return $doctor;
     }
 
+    /**
+     * Obtener todas las órdenes del doctor autenticado
+     */
     public function index(Request $request)
     {
-        // Verificar autenticación JWT
+        // Verificar autenticación del doctor
         $authResult = $this->checkAuthentication();
         if ($authResult instanceof \Illuminate\Http\JsonResponse) {
             return $authResult;
         }
-        $user = $authResult;
+        $doctor = $authResult;
 
         try {
             $query = Orden::query();
 
-            // Aplicar filtros si se proporcionan
-            if ($request->filled('medico')) {
-                $query->porMedico($request->medico);
-            }
+            // Filtrar por el doctor autenticado
+            $query->where('Orden_Cedula', $doctor->cedula);
 
+            // Aplicar filtros adicionales si se proporcionan
             if ($request->filled('paciente')) {
                 $query->porPaciente($request->paciente);
             }
@@ -91,10 +85,11 @@ class OrdenController extends Controller
                 'success' => true,
                 'data' => $ordenes,
                 'message' => 'Órdenes obtenidas correctamente',
-                'user_info' => [
-                    'id' => $user->id,
-                    'nombre' => $user->nombre,
-                    'email' => $user->email
+                'doctor_info' => [
+                    'id' => $doctor->id,
+                    'nombre' => $doctor->nombre,
+                    'email' => $doctor->email,
+                    'cedula' => $doctor->cedula
                 ]
             ], 200);
 
@@ -109,24 +104,26 @@ class OrdenController extends Controller
     }
 
     /**
-     * Mostrar una orden específica
+     * Mostrar una orden específica del doctor autenticado
      */
     public function show($id)
     {
-        // Verificar autenticación JWT
+        // Verificar autenticación del doctor
         $authResult = $this->checkAuthentication();
         if ($authResult instanceof \Illuminate\Http\JsonResponse) {
             return $authResult;
         }
-        $user = $authResult;
+        $doctor = $authResult;
 
         try {
-            $orden = Orden::find($id);
+            $orden = Orden::where('Orden_Id', $id)
+                         ->where('Orden_Cedula', $doctor->cedula)
+                         ->first();
 
             if (!$orden) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Orden no encontrada'
+                    'message' => 'Orden no encontrada o no tienes permisos para verla'
                 ], 404);
             }
 
@@ -147,21 +144,19 @@ class OrdenController extends Controller
     }
 
     /**
-     * Crear una nueva orden
+     * Crear una nueva orden para el doctor autenticado
      */
     public function store(Request $request)
     {
-        // Verificar autenticación JWT
+        // Verificar autenticación del doctor
         $authResult = $this->checkAuthentication();
         if ($authResult instanceof \Illuminate\Http\JsonResponse) {
             return $authResult;
         }
-        $user = $authResult;
+        $doctor = $authResult;
 
         try {
             $validator = Validator::make($request->all(), [
-                'Orden_NombreMedico' => 'required|string|max:255',
-                'Orden_Cedula' => 'required|string|max:255',
                 'Orden_NombrePaciente' => 'required|string|max:255',
                 'Orden_Celular' => 'required|string|max:20',
                 'Orden_Correo' => 'required|email|max:255',
@@ -181,7 +176,12 @@ class OrdenController extends Controller
                 ], 422);
             }
 
-            $orden = Orden::create($request->all());
+            // Crear la orden con los datos del doctor autenticado
+            $ordenData = $request->all();
+            $ordenData['Orden_NombreMedico'] = $doctor->nombre;
+            $ordenData['Orden_Cedula'] = $doctor->cedula;
+
+            $orden = Orden::create($ordenData);
 
             return response()->json([
                 'success' => true,
@@ -200,30 +200,30 @@ class OrdenController extends Controller
     }
 
     /**
-     * Actualizar una orden existente
+     * Actualizar una orden existente del doctor autenticado
      */
     public function update(Request $request, $id)
     {
-        // Verificar autenticación JWT
+        // Verificar autenticación del doctor
         $authResult = $this->checkAuthentication();
         if ($authResult instanceof \Illuminate\Http\JsonResponse) {
             return $authResult;
         }
-        $user = $authResult;
+        $doctor = $authResult;
 
         try {
-            $orden = Orden::find($id);
+            $orden = Orden::where('Orden_Id', $id)
+                         ->where('Orden_Cedula', $doctor->cedula)
+                         ->first();
 
             if (!$orden) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Orden no encontrada'
+                    'message' => 'Orden no encontrada o no tienes permisos para modificarla'
                 ], 404);
             }
 
             $validator = Validator::make($request->all(), [
-                'Orden_NombreMedico' => 'sometimes|required|string|max:255',
-                'Orden_Cedula' => 'sometimes|required|string|max:255',
                 'Orden_NombrePaciente' => 'sometimes|required|string|max:255',
                 'Orden_Celular' => 'sometimes|required|string|max:20',
                 'Orden_Correo' => 'sometimes|required|email|max:255',
@@ -232,7 +232,7 @@ class OrdenController extends Controller
                 'Orden_Tipo' => 'sometimes|required|string|max:100',
                 'Orden_Descripcion' => 'sometimes|required|string',
                 'Orden_Observaciones' => 'nullable|string',
-                'Orden_NivelUrgencia' => 'sometimes|required|string|in:Ordinaria,Urgente'
+                'Orden_NivelUrgencia' => 'sometimes|required|string|in:BAJA,MEDIA,ALTA,CRITICA'
             ]);
 
             if ($validator->fails()) {
@@ -262,24 +262,26 @@ class OrdenController extends Controller
     }
 
     /**
-     * Eliminar una orden
+     * Eliminar una orden del doctor autenticado
      */
     public function destroy($id)
     {
-        // Verificar autenticación JWT
+        // Verificar autenticación del doctor
         $authResult = $this->checkAuthentication();
         if ($authResult instanceof \Illuminate\Http\JsonResponse) {
             return $authResult;
         }
-        $user = $authResult;
+        $doctor = $authResult;
 
         try {
-            $orden = Orden::find($id);
+            $orden = Orden::where('Orden_Id', $id)
+                         ->where('Orden_Cedula', $doctor->cedula)
+                         ->first();
 
             if (!$orden) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Orden no encontrada'
+                    'message' => 'Orden no encontrada o no tienes permisos para eliminarla'
                 ], 404);
             }
 
@@ -301,29 +303,40 @@ class OrdenController extends Controller
     }
 
     /**
-     * Obtener estadísticas de órdenes
+     * Obtener estadísticas de órdenes del doctor autenticado
      */
     public function estadisticas()
     {
-        // Verificar autenticación JWT
+        // Verificar autenticación del doctor
         $authResult = $this->checkAuthentication();
         if ($authResult instanceof \Illuminate\Http\JsonResponse) {
             return $authResult;
         }
-        $user = $authResult;
+        $doctor = $authResult;
 
         try {
-            $totalOrdenes = Orden::count();
-            $ordenesHoy = Orden::porFecha(now()->toDateString())->count();
-            $ordenesUrgentes = Orden::porUrgencia('ALTA')->count() + Orden::porUrgencia('CRITICA')->count();
+            $totalOrdenes = Orden::where('Orden_Cedula', $doctor->cedula)->count();
+            $ordenesHoy = Orden::where('Orden_Cedula', $doctor->cedula)
+                              ->porFecha(now()->toDateString())
+                              ->count();
+            $ordenesUrgentes = Orden::where('Orden_Cedula', $doctor->cedula)
+                                   ->whereIn('Orden_NivelUrgencia', ['ALTA', 'CRITICA'])
+                                   ->count();
             
-            $ordenesPorTipo = Orden::selectRaw('ordenes.Orden_Tipo, COUNT(*) as total')
-                ->groupBy('ordenes.Orden_Tipo')
+            $ordenesPorTipo = Orden::where('Orden_Cedula', $doctor->cedula)
+                ->selectRaw('Orden_Tipo, COUNT(*) as total')
+                ->groupBy('Orden_Tipo')
                 ->get();
 
-            $ordenesPorUrgencia = Orden::selectRaw('Orden_NivelUrgencia, COUNT(*) as total')
+            $ordenesPorUrgencia = Orden::where('Orden_Cedula', $doctor->cedula)
+                ->selectRaw('Orden_NivelUrgencia, COUNT(*) as total')
                 ->groupBy('Orden_NivelUrgencia')
                 ->get();
+
+            // Órdenes de los últimos 7 días
+            $ordenesUltimos7Dias = Orden::where('Orden_Cedula', $doctor->cedula)
+                ->where('created_at', '>=', now()->subDays(7))
+                ->count();
 
             return response()->json([
                 'success' => true,
@@ -331,10 +344,15 @@ class OrdenController extends Controller
                     'total_ordenes' => $totalOrdenes,
                     'ordenes_hoy' => $ordenesHoy,
                     'ordenes_urgentes' => $ordenesUrgentes,
+                    'ordenes_ultimos_7_dias' => $ordenesUltimos7Dias,
                     'por_tipo' => $ordenesPorTipo,
                     'por_urgencia' => $ordenesPorUrgencia
                 ],
-                'message' => 'Estadísticas obtenidas correctamente'
+                'message' => 'Estadísticas obtenidas correctamente',
+                'doctor_info' => [
+                    'nombre' => $doctor->nombre,
+                    'cedula' => $doctor->cedula
+                ]
             ], 200);
 
         } catch (\Exception $e) {
@@ -347,52 +365,4 @@ class OrdenController extends Controller
         }
     }
 
-    /**
-     * Refrescar el token JWT
-     */
-    public function refreshToken()
-    {
-        try {
-            $token = JWTAuth::refresh();
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Token refrescado correctamente',
-                'data' => [
-                    'token' => $token,
-                    'token_type' => 'bearer',
-                    'expires_in' => config('jwt.ttl') * 60 // Convertir minutos a segundos
-                ]
-            ], 200);
-
-        } catch (JWTException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No se pudo refrescar el token',
-                'error' => $e->getMessage()
-            ], 401);
-        }
-    }
-
-    /**
-     * Cerrar sesión (invalidar token)
-     */
-    public function logout()
-    {
-        try {
-            JWTAuth::invalidate(JWTAuth::getToken());
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Sesión cerrada correctamente'
-            ], 200);
-
-        } catch (JWTException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No se pudo cerrar la sesión',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
 }

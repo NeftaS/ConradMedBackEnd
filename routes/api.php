@@ -47,9 +47,6 @@ Route::middleware([IsDoctor::class])->group(function () {
         Route::post('/', 'store');
         Route::put('/{id}', 'update');
         Route::delete('/{id}', 'destroy');
-        
-        Route::post('/refresh-token', 'refreshToken');
-        Route::post('/logout', 'logout');
     });
 
     Route::prefix('cita')->controller(CitaController::class)->group(function () {
