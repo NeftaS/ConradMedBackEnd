@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Services\EmailService;
-use App\Models\User;
+use App\Services\PhpMailService;
 
 class TestEmailService extends Command
 {
@@ -13,57 +13,79 @@ class TestEmailService extends Command
      *
      * @var string
      */
-    protected $signature = 'email:test {email : Email para enviar la prueba}';
+    protected $signature = 'email:test {email} {--subject=Test Email} {--message=Este es un email de prueba}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Probar el sistema de correos enviando un email de prueba';
+    protected $description = 'Probar el servicio de email con PHP puro';
 
     /**
      * Execute the console command.
      */
-    public function handle(EmailService $emailService)
+    public function handle()
     {
         $email = $this->argument('email');
-        
-        $this->info('🧪 Probando sistema de correos...');
-        
+        $subject = $this->option('subject');
+        $message = $this->option('message');
+
+        $this->info('Probando servicio de email...');
+        $this->line("Enviando email a: $email");
+        $this->line("Asunto: $subject");
+        $this->line("Mensaje: $message");
+
+        // Crear instancia del servicio
+        $phpMailService = new PhpMailService();
+        $emailService = new EmailService($phpMailService);
+
         // Verificar configuración
         if (!$emailService->isConfigured()) {
-            $this->error('❌ El servicio de correos no está configurado correctamente');
-            $this->line('Verifica que tengas configurado:');
-            $this->line('- RESEND_KEY en tu archivo .env');
-            $this->line('- MAIL_MAILER=resend en tu archivo .env');
+            $this->error('El servicio de email no está configurado correctamente.');
+            $this->line('Información de configuración:');
+            $configInfo = $emailService->getConfigurationInfo();
+            foreach ($configInfo as $key => $value) {
+                $this->line("  $key: " . (is_bool($value) ? ($value ? 'Sí' : 'No') : $value));
+            }
             return 1;
         }
-        
-        $this->info('✅ Servicio de correos configurado correctamente');
-        
-        // Crear usuario de prueba
-        $testUser = new User();
-        $testUser->name = 'Usuario de Prueba';
-        $testUser->email = $email;
-        
-        $this->info('📧 Enviando correo de bienvenida de prueba...');
-        
+
+        // Crear contenido HTML simple
+        $htmlContent = "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <title>$subject</title>
+        </head>
+        <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+            <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
+                <h1 style='color: #2c3e50;'>$subject</h1>
+                <p>$message</p>
+                <p>Este es un email de prueba enviado desde ConradMed usando PHP puro.</p>
+                <p>Fecha y hora: " . now()->format('d/m/Y H:i:s') . "</p>
+                <p>Saludos,<br>El equipo de ConradMed</p>
+            </div>
+        </body>
+        </html>";
+
+        // Enviar email
         try {
-            $result = $emailService->sendWelcomeEmail($testUser);
+            $result = $emailService->sendCustomEmail($email, $subject, $htmlContent);
             
             if ($result) {
-                $this->info('✅ Correo enviado exitosamente a: ' . $email);
-                $this->line('Revisa tu bandeja de entrada (y carpeta de spam)');
+                $this->info('✅ Email enviado exitosamente!');
+                $this->line('Revisa tu bandeja de entrada (y carpeta de spam).');
             } else {
-                $this->error('❌ Error al enviar el correo');
+                $this->error('❌ Error al enviar el email.');
+                $this->line('Revisa los logs para más detalles.');
             }
         } catch (\Exception $e) {
-            $this->error('❌ ['.get_class($e).'] code='.$e->getCode().' msg='.$e->getMessage());
-            $this->line(substr($e->getTraceAsString(), 0, 800)); // un resumen
+            $this->error('❌ Excepción al enviar email: ' . $e->getMessage());
             return 1;
         }
-        
+
         return 0;
     }
 }
