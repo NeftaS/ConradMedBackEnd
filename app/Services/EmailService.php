@@ -6,15 +6,11 @@ use Illuminate\Support\Facades\Log;
 
 class EmailService
 {
-    protected $phpMailService;
     protected $resendService;
-    protected $useResend;
 
-    public function __construct(PhpMailService $phpMailService, ResendPhpService $resendService = null)
+    public function __construct(ResendPhpService $resendService)
     {
-        $this->phpMailService = $phpMailService;
         $this->resendService = $resendService;
-        $this->useResend = config('mail.default') === 'resend' && $this->resendService && $this->resendService->isConfigured();
     }
 
     /**
@@ -27,21 +23,12 @@ class EmailService
             $htmlContent = $this->getWelcomeEmailTemplate($user);
             $textContent = $this->getWelcomeEmailTextTemplate($user);
 
-            if ($this->useResend) {
-                $result = $this->resendService->sendEmail(
-                    $user->email, 
-                    $subject, 
-                    $htmlContent, 
-                    $textContent
-                );
-            } else {
-                $result = $this->phpMailService->sendHtmlEmail(
-                    $user->email, 
-                    $subject, 
-                    $htmlContent, 
-                    $textContent
-                );
-            }
+            $result = $this->resendService->sendEmail(
+                $user->email, 
+                $subject, 
+                $htmlContent, 
+                $textContent
+            );
 
             if ($result['success'] ?? $result) {
                 Log::info('Correo de bienvenida enviado exitosamente a: ' . $user->email);
@@ -66,21 +53,12 @@ class EmailService
             $htmlContent = $this->getCitaConfirmationTemplate($cita, $user, $doctor);
             $textContent = $this->getCitaConfirmationTextTemplate($cita, $user, $doctor);
 
-            if ($this->useResend) {
-                $result = $this->resendService->sendEmail(
-                    $user->email, 
-                    $subject, 
-                    $htmlContent, 
-                    $textContent
-                );
-            } else {
-                $result = $this->phpMailService->sendHtmlEmail(
-                    $user->email, 
-                    $subject, 
-                    $htmlContent, 
-                    $textContent
-                );
-            }
+            $result = $this->resendService->sendEmail(
+                $user->email, 
+                $subject, 
+                $htmlContent, 
+                $textContent
+            );
 
             if ($result['success'] ?? $result) {
                 Log::info('Confirmación de cita enviada exitosamente a: ' . $user->email);
@@ -105,21 +83,12 @@ class EmailService
             $htmlContent = $this->getOrdenConfirmationTemplate($orden, $user);
             $textContent = $this->getOrdenConfirmationTextTemplate($orden, $user);
 
-            if ($this->useResend) {
-                $result = $this->resendService->sendEmail(
-                    $user->email, 
-                    $subject, 
-                    $htmlContent, 
-                    $textContent
-                );
-            } else {
-                $result = $this->phpMailService->sendHtmlEmail(
-                    $user->email, 
-                    $subject, 
-                    $htmlContent, 
-                    $textContent
-                );
-            }
+            $result = $this->resendService->sendEmail(
+                $user->email, 
+                $subject, 
+                $htmlContent, 
+                $textContent
+            );
 
             if ($result['success'] ?? $result) {
                 Log::info('Confirmación de orden enviada exitosamente a: ' . $user->email);
@@ -140,12 +109,8 @@ class EmailService
     public function sendCustomEmail($to, $subject, $htmlContent, $textContent = null)
     {
         try {
-            if ($this->useResend) {
-                $result = $this->resendService->sendEmail($to, $subject, $htmlContent, $textContent);
-            } else {
-                $result = $this->phpMailService->sendHtmlEmail($to, $subject, $htmlContent, $textContent);
-            }
-            
+            $result = $this->resendService->sendEmail($to, $subject, $htmlContent, $textContent);
+
             if ($result['success'] ?? $result) {
                 Log::info('Correo personalizado enviado exitosamente a: ' . $to);
                 return true;
@@ -160,15 +125,41 @@ class EmailService
     }
 
     /**
+     * Enviar código de restablecimiento de contraseña
+     */
+    public function sendPasswordResetCode($user, $code)
+    {
+        try {
+            $subject = 'Código de Restablecimiento de Contraseña - ConradMed';
+            $htmlContent = $this->getPasswordResetCodeTemplate($user, $code);
+            $textContent = $this->getPasswordResetCodeTextTemplate($user, $code);
+
+            $result = $this->resendService->sendEmail(
+                $user->email, 
+                $subject, 
+                $htmlContent, 
+                $textContent
+            );
+
+            if ($result['success'] ?? $result) {
+                Log::info('Código de restablecimiento enviado exitosamente a: ' . $user->email);
+                return true;
+            } else {
+                Log::error('Error al enviar código de restablecimiento a: ' . $user->email);
+                return false;
+            }
+        } catch (\Exception $e) {
+            Log::error('Error al enviar código de restablecimiento: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Verificar si el servicio de correos está configurado correctamente
      */
     public function isConfigured()
     {
-        if ($this->useResend) {
-            return $this->resendService->isConfigured();
-        } else {
-            return $this->phpMailService->isConfigured();
-        }
+        return $this->resendService->isConfigured();
     }
 
     /**
@@ -176,19 +167,11 @@ class EmailService
      */
     public function getConfigurationInfo()
     {
-        if ($this->useResend) {
-            return [
-                'service' => 'Resend (PHP puro)',
-                'configured' => $this->resendService->isConfigured(),
-                'config_info' => $this->resendService->getConfigurationInfo()
-            ];
-        } else {
-            return [
-                'service' => 'PHP Mail',
-                'configured' => $this->phpMailService->isConfigured(),
-                'config_info' => $this->phpMailService->getConfigurationInfo()
-            ];
-        }
+        return [
+            'service' => 'Resend (PHP puro)',
+            'configured' => $this->resendService->isConfigured(),
+            'config_info' => $this->resendService->getConfigurationInfo()
+        ];
     }
 
     /**
@@ -196,7 +179,7 @@ class EmailService
      */
     public function getActiveService()
     {
-        return $this->useResend ? 'Resend' : 'PHP Mail';
+        return 'Resend';
     }
 
     // Plantillas de email
@@ -338,6 +321,57 @@ Detalles de la orden:
 - Total: $" . number_format($orden->total, 2) . "
 
 Te notificaremos cuando tu orden esté lista.
+
+Saludos,
+El equipo de ConradMed";
+    }
+
+    private function getPasswordResetCodeTemplate($user, $code)
+    {
+        return "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <title>Código de Restablecimiento de Contraseña</title>
+        </head>
+        <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+            <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
+                <h1 style='color: #2c3e50;'>Restablecimiento de Contraseña</h1>
+                <p>Hola {$user->nombre},</p>
+                <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en ConradMed.</p>
+                <p>Utiliza el siguiente código para restablecer tu contraseña:</p>
+                <div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; border: 2px solid #e9ecef;'>
+                    <h2 style='color: #2c3e50; margin: 0; font-size: 32px; letter-spacing: 5px;'>{$code}</h2>
+                </div>
+                <p><strong>Este código expira en 15 minutos.</strong></p>
+                <p>Si no solicitaste este restablecimiento, puedes ignorar este correo. Tu contraseña permanecerá sin cambios.</p>
+                <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;'>
+                    <p style='margin: 0; color: #856404;'><strong>Importante:</strong> Nunca compartas este código con nadie. ConradMed nunca te pedirá tu código por teléfono o correo.</p>
+                </div>
+                <p>Saludos,<br>El equipo de ConradMed</p>
+            </div>
+        </body>
+        </html>";
+    }
+
+    private function getPasswordResetCodeTextTemplate($user, $code)
+    {
+        return "Restablecimiento de Contraseña
+
+Hola {$user->nombre},
+
+Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en ConradMed.
+
+Utiliza el siguiente código para restablecer tu contraseña:
+
+CÓDIGO: {$code}
+
+Este código expira en 15 minutos.
+
+Si no solicitaste este restablecimiento, puedes ignorar este correo. Tu contraseña permanecerá sin cambios.
+
+IMPORTANTE: Nunca compartas este código con nadie. ConradMed nunca te pedirá tu código por teléfono o correo.
 
 Saludos,
 El equipo de ConradMed";

@@ -281,7 +281,7 @@ class OrdenController extends Controller
             if (!$orden) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Orden no encontrada o no tienes permisos para eliminarla'
+                    'message' => 'Orden no encontrada'
                 ], 404);
             }
 
