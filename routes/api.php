@@ -10,12 +10,30 @@ use App\Http\Middleware\IsDoctor;
 use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\OrdenController;
 use App\Http\Controllers\EmailController;
+use App\Http\Controllers\DoctorPasswordController;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 
 Route::post('login-doctor', [DoctorController::class, 'login']);
 Route::post('register-doctor', [DoctorController::class, 'register']);
-
+Route::post('/password/request-code', [DoctorPasswordController::class, 'requestCode']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+Route::post('/password/request-code', [DoctorPasswordController::class, 'requestCode']);
+Route::post('/password/verify-code',  [DoctorPasswordController::class, 'verifyCode']);
+Route::post('/password/reset',        [DoctorPasswordController::class, 'resetPassword']);
+
+Route::get('/db-ping', function () {
+    DB::select('select 1');
+    return response()->json(['db' => 'ok']);
+});
+
+Route::get('/mail-test', function () {
+    Mail::raw('Prueba SMTP Gmail desde ConradMed.', function ($m) {
+        $m->to('TU_CORREO_DE_PRUEBA@example.com')->subject('Mail Test');
+    });
+    return 'ok';
+});
 
 Route::middleware([IsUserAuth::class])->group(function () {
     Route::prefix('user')->controller(AuthController::class)->group(function () {
