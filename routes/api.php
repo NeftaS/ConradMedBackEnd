@@ -13,7 +13,9 @@ use App\Http\Controllers\EmailController;
 use App\Http\Controllers\DoctorPasswordController;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\PdfMailController;
 
+Route::post('/mail/pdf-from-text', [PdfMailController::class, 'sendPdfFromText']);
 Route::post('login-doctor', [DoctorController::class, 'login']);
 Route::post('register-doctor', [DoctorController::class, 'register']);
 Route::post('/password/request-code', [DoctorPasswordController::class, 'requestCode']);
