@@ -1,0 +1,390 @@
+{
+    "endpoints": [
+      {
+        "method": "POST",
+        "path": "/api/login-doctor",
+        "controller": "DoctorController",
+        "action": "login",
+        "middleware": [],
+        "fields": {
+          "telefono": "required|string",
+          "password": "required|string|min:8"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/register-doctor",
+        "controller": "DoctorController",
+        "action": "register",
+        "middleware": [],
+        "fields": {
+          "nombre": "required|string|min:3|max:45",
+          "telefono": "required|string|min:10|max:10|unique:doctores",
+          "email": "required|string|email|unique:doctores",
+          "password": "required|string|min:8|confirmed",
+          "puntos": "nullable|string",
+          "cedula": "required|string|min:10|max:10|unique:doctores"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/register",
+        "controller": "AuthController",
+        "action": "register",
+        "middleware": [],
+        "fields": {
+          "nombre": "required|string|min:3|max:45",
+          "telefono": "required|string|min:10|max:10|unique:usuarios",
+          "email": "required|string|email|unique:usuarios",
+          "password": "required|string|min:8|confirmed"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/login",
+        "controller": "AuthController",
+        "action": "login",
+        "middleware": [],
+        "fields": {
+          "telefono": "required|string|min:10|max:10"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/user/logout",
+        "controller": "AuthController",
+        "action": "logout",
+        "middleware": ["IsUserAuth"],
+        "fields": {}
+      },
+      {
+        "method": "GET",
+        "path": "/api/user/me",
+        "controller": "AuthController",
+        "action": "getUser",
+        "middleware": ["IsUserAuth"],
+        "fields": {}
+      },
+      {
+        "method": "GET",
+        "path": "/api/cita/mostrar/{id}",
+        "controller": "CitaController",
+        "action": "mostrarCitaPorId",
+        "middleware": ["IsUserAuth"],
+        "fields": {}
+      },
+      {
+        "method": "GET",
+        "path": "/api/cita/mostrar",
+        "controller": "CitaController",
+        "action": "mostrarCita",
+        "middleware": ["IsUserAuth"],
+        "fields": {}
+      },
+      {
+        "method": "POST",
+        "path": "/api/cita/agendar",
+        "controller": "CitaController",
+        "action": "agregarCita",
+        "middleware": ["IsUserAuth"],
+        "fields": {
+          "cita_fecha": "required|date_format:Y-m-d H:i:s",
+          "cita_estatus": "required|in:Activo,Cancelado,Completado",
+          "lugar_id": "required|exists:lugares,id",
+          "doctor_id": "required|exists:doctores,id",
+          "cliente_id": "required|exists:usuarios,id"
+        }
+      },
+      {
+        "method": "PUT",
+        "path": "/api/cita/actualizar/{id}",
+        "controller": "CitaController",
+        "action": "actualizarCita",
+        "middleware": ["IsUserAuth"],
+        "fields": {
+          "cita_fecha": "required|date_format:Y-m-d H:i:s",
+          "cita_estatus": "required|in:Activo,Cancelado,Completado",
+          "lugar_id": "required|exists:lugares,id",
+          "doctor_id": "required|exists:doctores,id",
+          "cliente_id": "required|exists:usuarios,id"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/cita/cancelar/{id}",
+        "controller": "CitaController",
+        "action": "cancelarCita",
+        "middleware": ["IsUserAuth"],
+        "fields": {}
+      },
+      {
+        "method": "GET",
+        "path": "/api/doctor/me",
+        "controller": "DoctorController",
+        "action": "getDoctor",
+        "middleware": ["IsDoctor"],
+        "fields": {}
+      },
+      {
+        "method": "PUT",
+        "path": "/api/doctor/actualizar",
+        "controller": "DoctorController",
+        "action": "updateDoctor",
+        "middleware": ["IsDoctor"],
+        "fields": {}
+      },
+      {
+        "method": "GET",
+        "path": "/api/ordenes/",
+        "controller": "OrdenController",
+        "action": "index",
+        "middleware": ["IsDoctor"],
+        "fields": {}
+      },
+      {
+        "method": "GET",
+        "path": "/api/ordenes/estadisticas",
+        "controller": "OrdenController",
+        "action": "estadisticas",
+        "middleware": ["IsDoctor"],
+        "fields": {}
+      },
+      {
+        "method": "GET",
+        "path": "/api/ordenes/{id}",
+        "controller": "OrdenController",
+        "action": "show",
+        "middleware": ["IsDoctor"],
+        "fields": {}
+      },
+      {
+        "method": "POST",
+        "path": "/api/ordenes/",
+        "controller": "OrdenController",
+        "action": "store",
+        "middleware": ["IsDoctor"],
+        "fields": {
+          "Orden_NombrePaciente": "required|string|max:255",
+          "Orden_Celular": "required|string|max:20",
+          "Orden_Correo": "required|email|max:255",
+          "Orden_Fecha": "required|date",
+          "Orden_Diagnostico": "required|string|max:255",
+          "Orden_Tipo": "required|string|max:100",
+          "Orden_Descripcion": "required|string",
+          "Orden_Observaciones": "nullable|string",
+          "Orden_NivelUrgencia": "required|string|in:BAJA,MEDIA,ALTA,CRITICA"
+        }
+      },
+      {
+        "method": "PUT",
+        "path": "/api/ordenes/{id}",
+        "controller": "OrdenController",
+        "action": "update",
+        "middleware": ["IsDoctor"],
+        "fields": {
+          "Orden_NombrePaciente": "sometimes|required|string|max:255",
+          "Orden_Celular": "sometimes|required|string|max:20",
+          "Orden_Correo": "sometimes|required|email|max:255",
+          "Orden_Fecha": "sometimes|required|date",
+          "Orden_Diagnostico": "sometimes|required|string|max:255",
+          "Orden_Tipo": "sometimes|required|string|max:100",
+          "Orden_Descripcion": "sometimes|required|string",
+          "Orden_Observaciones": "nullable|string",
+          "Orden_NivelUrgencia": "sometimes|required|string|in:BAJA,MEDIA,ALTA,CRITICA"
+        }
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/ordenes/{id}",
+        "controller": "OrdenController",
+        "action": "destroy",
+        "middleware": ["IsDoctor"],
+        "fields": {}
+      },
+      {
+        "method": "GET",
+        "path": "/api/cita/{id}",
+        "controller": "CitaController",
+        "action": "mostrarCitaPorId",
+        "middleware": ["IsDoctor"],
+        "fields": {}
+      },
+      {
+        "method": "GET",
+        "path": "/api/cita/",
+        "controller": "CitaController",
+        "action": "mostrarCita",
+        "middleware": ["IsDoctor"],
+        "fields": {}
+      },
+      {
+        "method": "POST",
+        "path": "/api/cita/",
+        "controller": "CitaController",
+        "action": "agregarCita",
+        "middleware": ["IsDoctor"],
+        "fields": {
+          "cita_fecha": "required|date_format:Y-m-d H:i:s",
+          "cita_estatus": "required|in:Activo,Cancelado,Completado",
+          "lugar_id": "required|exists:lugares,id",
+          "doctor_id": "required|exists:doctores,id",
+          "cliente_id": "required|exists:usuarios,id"
+        }
+      },
+      {
+        "method": "PUT",
+        "path": "/api/cita/{id}",
+        "controller": "CitaController",
+        "action": "actualizarCita",
+        "middleware": ["IsDoctor"],
+        "fields": {
+          "cita_fecha": "required|date_format:Y-m-d H:i:s",
+          "cita_estatus": "required|in:Activo,Cancelado,Completado",
+          "lugar_id": "required|exists:lugares,id",
+          "doctor_id": "required|exists:doctores,id",
+          "cliente_id": "required|exists:usuarios,id"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/cita/{id}",
+        "controller": "CitaController",
+        "action": "cancelarCita",
+        "middleware": ["IsDoctor"],
+        "fields": {}
+      },
+      {
+        "method": "POST",
+        "path": "/api/analisis/",
+        "controller": "AnalisisController",
+        "action": "agregarAnalisis",
+        "middleware": ["IsDoctor"],
+        "fields": {
+          "analisis_fecha": "required|date_format:Y-m-d H:i:s",
+          "analisis_ruta": "required|string",
+          "cliente_id": "required|exists:usuarios,id",
+          "categoria_id": "required|exists:categoria_analisis,id",
+          "tipoanalisis_id": "required|exists:tipo_analisis,id",
+          "doctor_id": "required|exists:doctores,id"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/analisis/",
+        "controller": "AnalisisController",
+        "action": "mostrarAnalisis",
+        "middleware": ["IsDoctor"],
+        "fields": {}
+      },
+      {
+        "method": "GET",
+        "path": "/api/analisis/{id}",
+        "controller": "AnalisisController",
+        "action": "mostrarAnalisisPorId",
+        "middleware": ["IsDoctor"],
+        "fields": {}
+      },
+      {
+        "method": "PUT",
+        "path": "/api/analisis/{id}",
+        "controller": "AnalisisController",
+        "action": "actualizarAnalisis",
+        "middleware": ["IsDoctor"],
+        "fields": {
+          "analisis_fecha": "required|date_format:Y-m-d H:i:s",
+          "analisis_ruta": "required|string",
+          "cliente_id": "required|exists:usuarios,id",
+          "categoria_id": "required|exists:categoria_analisis,id",
+          "tipoanalisis_id": "required|exists:tipo_analisis,id",
+          "doctor_id": "required|exists:doctores,id"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/analisis/{id}",
+        "controller": "AnalisisController",
+        "action": "eliminarAnalisis",
+        "middleware": ["IsDoctor"],
+        "fields": {}
+      },
+      {
+        "method": "GET",
+        "path": "/api/productos/",
+        "controller": "ProductosController",
+        "action": "mostrarProducto",
+        "middleware": [],
+        "fields": {}
+      },
+      {
+        "method": "GET",
+        "path": "/api/productos/buscar",
+        "controller": "ProductosController",
+        "action": "buscarProductos",
+        "middleware": [],
+        "fields": {}
+      },
+      {
+        "method": "GET",
+        "path": "/api/productos/{id}",
+        "controller": "ProductosController",
+        "action": "mostrarProductoPorId",
+        "middleware": [],
+        "fields": {}
+      },
+      {
+        "method": "POST",
+        "path": "/api/productos/",
+        "controller": "ProductosController",
+        "action": "agregarProducto",
+        "middleware": [],
+        "fields": {
+          "id": "required|integer|unique:productos,id",
+          "clave": "required|string|max:255",
+          "producto": "required|string|max:255",
+          "precio": "required|numeric|min:0",
+          "precio_iva": "required|numeric|min:0",
+          "clave_producto_servicio": "required|string|max:255",
+          "detalles": "nullable|string",
+          "indicaciones": "nullable|string",
+          "tiempoEntrega": "nullable|string|max:255",
+          "duracion": "nullable|string|max:255",
+          "descripcion": "nullable|string"
+        }
+      },
+      {
+        "method": "PUT",
+        "path": "/api/productos/{id}",
+        "controller": "ProductosController",
+        "action": "actualizarProducto",
+        "middleware": [],
+        "fields": {
+          "clave": "sometimes|required|string|max:255",
+          "producto": "sometimes|required|string|max:255",
+          "precio": "sometimes|required|numeric|min:0",
+          "precio_iva": "sometimes|required|numeric|min:0",
+          "clave_producto_servicio": "sometimes|required|string|max:255",
+          "detalles": "nullable|string",
+          "indicaciones": "nullable|string",
+          "tiempoEntrega": "nullable|string|max:255",
+          "duracion": "nullable|string|max:255",
+          "descripcion": "nullable|string"
+        }
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/productos/{id}",
+        "controller": "ProductosController",
+        "action": "eliminarProducto",
+        "middleware": [],
+        "fields": {}
+      },
+      {
+        "method": "GET",
+        "path": "/api/enviar-prueba",
+        "controller": "EmailController",
+        "action": "sendWelcomeEmail",
+        "middleware": [],
+        "fields": {}
+      }
+    ]
+  }

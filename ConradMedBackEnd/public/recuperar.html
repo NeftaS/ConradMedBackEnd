@@ -1,0 +1,11 @@
+docker compose exec app sh -lc 'cat > public/recuperar.html << "EOF"
+<!doctype html><html lang="es"><meta charset="utf-8"/>
+<title>Recuperación – Test</title>
+<h1>Recuperación – Test</h1>
+<p>Si ves esto, el archivo estático funciona. API ping a continuación:</p>
+<pre id="out"></pre>
+<script>
+fetch("/api/ping").then(r=>r.json()).then(j=>{document.getElementById("out").textContent=JSON.stringify(j,null,2)}).catch(e=>{document.getElementById("out").textContent=e});
+</script>
+</html>
+EOF'

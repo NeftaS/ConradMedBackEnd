@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # Servicio de la aplicación Laravel
   app:
     build:
       context: .
@@ -15,13 +14,12 @@ services:
     networks:
       - conradmed_network
 
-  # Servicio de Nginx
   nginx:
     image: nginx:alpine
     container_name: conradmed_nginx
     restart: unless-stopped
     ports:
-      - "8000:80"
+      - "8088:80"
     volumes:
       - ./:/var/www
       - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
@@ -30,7 +28,6 @@ services:
     depends_on:
       - app
 
-  # Servicio de MySQL
   db:
     image: mysql:8.0
     container_name: conradmed_db
@@ -40,8 +37,6 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_USER: conradmed
       MYSQL_PASSWORD: conradmed123
-      SERVICE_TAGS: dev
-      SERVICE_NAME: mysql
     ports:
       - "3306:3306"
     volumes:
@@ -50,7 +45,6 @@ services:
     networks:
       - conradmed_network
 
-  # Servicio de phpMyAdmin (opcional)
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: conradmed_phpmyadmin
@@ -61,7 +55,7 @@ services:
       PMA_USER: root
       PMA_PASSWORD: root
     ports:
-      - "8080:80"
+      - "8089:80"
     networks:
       - conradmed_network
     depends_on:
@@ -73,4 +67,5 @@ volumes:
 
 networks:
   conradmed_network:
-    driver: bridge 
+    driver: bridge
+

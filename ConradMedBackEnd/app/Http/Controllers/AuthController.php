@@ -1,0 +1,99 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\User;
+
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
+
+class AuthController extends Controller
+{
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'nombre' =>'required|string|min:3|max:45',
+            'telefono' =>'required|string|min:10|max:10|unique:usuarios',
+            'email' =>'required|string|email|unique:usuarios',
+            'password' =>'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        try {
+            $user = User::create([
+                'nombre' => $request->nombre,
+                'telefono' => $request->telefono,
+                'email' => $request->email,
+                'password' => bcrypt($request->password)
+            ]);
+
+            $token = JWTAuth::fromUser($user);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error al registrar el usuario',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+
+        $user->makeHidden(['password']);
+
+        return response()->json([
+            'message' => 'Usuario creado correctamente',
+            'user' => $user,
+            'token' => $token
+        ], 201);
+    }
+
+    public function login(Request $request){
+        $validator = Validator::make($request->all(), [
+            'telefono' => 'required|string|min:10|max:10'
+        ]);
+
+        if($validator->fails()){
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        try{
+            // Buscar usuario por teléfono
+            $user = User::where('telefono', $request->telefono)->first();
+            
+            if(!$user){
+                return response()->json(['error' => 'Teléfono no registrado en el sistema'], 401);
+            }
+
+            // Generar token JWT directamente sin verificar contraseña
+            $token = JWTAuth::fromUser($user);
+            
+            $user->makeHidden(['password']);
+
+            return response()->json([
+                'user' => $user,
+                'token' => $token
+            ], 200);
+
+        }catch(JWTException $e){
+            return response()->json(['error' => 'No se puede iniciar sesión, intente más tarde'], 500);
+        }
+    }
+
+    public function getUser(){
+        $user = Auth::user();
+        return response()->json($user, 200);
+    }
+
+    public function logout(){
+        try {
+            JWTAuth::invalidate(JWTAuth::getToken());
+            return response()->json(['message' => 'Se ha cerrado sesión'], 200);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'No se pudo cerrar sesión, token inválido'], 500);
+        }
+    }
+}
